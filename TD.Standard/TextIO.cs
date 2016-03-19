@@ -2,7 +2,7 @@
 
 namespace TD
 {
-    public static class TextRW
+    public static class TextIO
     {
         public static Reduction Reduce<Reduction>(
             this TextReader reader,

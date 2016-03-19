@@ -119,9 +119,9 @@ namespace GuessingGame
                 $"We've picked a value between {game.Min} and {game.Max}. Your job is to guess it.\n",
                 "We'll let you know if you're getting warmer or colder. Let's start!\n",
                 "Guess: "
-            }.Reduce(Console.Out, Passing<string>().Apply(TextRW.WriteReducer<string>()));
+            }.Reduce(Console.Out, Passing<string>().Apply(TextIO.WriteReducer<string>()));
 
-            Console.In.Reduce(Console.Out, gamePlaying.Apply(TextRW.WriteReducer<string>()));
+            Console.In.Reduce(Console.Out, gamePlaying.Apply(TextIO.WriteReducer<string>()));
 
             Console.ReadKey();
         }

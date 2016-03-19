@@ -46,7 +46,7 @@
     <Compile Include="Switching.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Standard.cs" />
-    <Compile Include="TextRW.cs" />
+    <Compile Include="TextIO.cs" />
     <Compile Include="TryParsing.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
