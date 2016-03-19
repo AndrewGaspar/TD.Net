@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Guessing Game",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceRoot}/Samples/GuessingGame/bin/Debug/GuessingGame.exe",
+			"args": ["0", "50"],
+			"cwd": "${workspaceRoot}",
+			"stopAtEntry": false
+		}
+	]
+}

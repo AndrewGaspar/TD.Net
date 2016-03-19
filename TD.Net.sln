@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TD.Core", "TD.Core\TD.Core.csproj", "{D0692FFC-D78D-462C-A82E-2DF87950BB60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuessingGame", "Samples\GuessingGame\GuessingGame.csproj", "{42496077-E351-4085-BEA0-936D6E66FE22}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TD.Standard", "TD.Standard\TD.Standard.csproj", "{69A1EDAC-8915-4D75-B9D9-79D9E690F3B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0692FFC-D78D-462C-A82E-2DF87950BB60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0692FFC-D78D-462C-A82E-2DF87950BB60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0692FFC-D78D-462C-A82E-2DF87950BB60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0692FFC-D78D-462C-A82E-2DF87950BB60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42496077-E351-4085-BEA0-936D6E66FE22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42496077-E351-4085-BEA0-936D6E66FE22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42496077-E351-4085-BEA0-936D6E66FE22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42496077-E351-4085-BEA0-936D6E66FE22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69A1EDAC-8915-4D75-B9D9-79D9E690F3B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69A1EDAC-8915-4D75-B9D9-79D9E690F3B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69A1EDAC-8915-4D75-B9D9-79D9E690F3B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69A1EDAC-8915-4D75-B9D9-79D9E690F3B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
