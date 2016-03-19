@@ -37,10 +37,11 @@ namespace TD
             ITransducer<Input, Result> transuducer)
         {
             var reducer = transuducer.Apply(Collection.ListReducer<Result>());
+            var list = new List<Result>();
 
             foreach (var value in input)
             {
-                var reduction = reducer.Invoke(new List<Result>(), value);
+                var reduction = reducer.Invoke(list, value);
 
                 foreach (var result in reduction.Value)
                 {
@@ -51,6 +52,8 @@ namespace TD
                 {
                     yield break;
                 }
+
+                list.Clear();
             }
 
             var completionReduction = reducer.Complete(new List<Result>());
