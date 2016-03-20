@@ -23,5 +23,17 @@ namespace TD
             Mapping<T, string>(val => string.Format(formatString, val));
 
         public static ITransducer<T, T> Terminating<T>(Predicate<T> test) => new Terminating<T>(test);
+
+        public static ITransducer<From, To> Casting<From, To>() where From : To =>
+            Mapping<From, To>(a => a);
+
+        public static ITransducer<T, To> Casting<T, From, To>(this ITransducer<T, From> transducer) 
+            where From : To => 
+            transducer.Compose(Casting<From, To>());
+
+        public static ITransducer<T, object> Relaxing<T>() => Casting<T, object>();
+
+        public static ITransducer<T, object> Relaxing<T, U>(this ITransducer<T, U> transducer) =>
+            transducer.Compose(Casting<U, object>());
     }
 }
