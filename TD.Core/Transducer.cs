@@ -7,8 +7,14 @@ namespace TD
         public static ITransducer<From, To> Mapping<From, To>(Func<From, To> map) =>
             new MappingTransducer<From, To>(map);
 
+        public static ITransducer<A, C> Mapping<A, B, C>(
+            this ITransducer<A, B> transducer, Func<B, C> map) => Compose(transducer, Mapping(map));
+
         public static ITransducer<Input, Input> Filtering<Input>(Predicate<Input> test) =>
             new FilteringTransducer<Input>(test);
+
+        public static ITransducer<A, B> Filtering<A, B>(
+            this ITransducer<A, B> transducer, Predicate<B> test) => Compose(transducer, Filtering(test));
 
         public static ITransducer<Input, Input> Passing<Input>() => new PassingTransducer<Input>();
 

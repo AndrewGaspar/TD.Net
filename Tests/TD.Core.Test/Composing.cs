@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using TD.Test.Common;
+using static TD.Transducer;
 
 namespace TD.Core.Test
 {
@@ -13,8 +14,9 @@ namespace TD.Core.Test
             Verify.SequenceEquivalent(
                 Enumerable.Range(0, 15),
                 new[] { "10", "11", "12", "13", "14" },
-                Transducer.Mapping<int, string>(x => x.ToString())
-                          .Compose(Transducer.Filtering<string>(str => str.Length == 2)));
+                Passing<int>()
+                    .Mapping(x => x.ToString())
+                    .Filtering(str => str.Length == 2));
         }
     }
 }
