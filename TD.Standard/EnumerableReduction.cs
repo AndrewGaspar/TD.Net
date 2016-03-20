@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace TD
 {
@@ -19,17 +20,19 @@ namespace TD
             Reduction reduction,
             IReducer<Reduction, Input> reducer)
         {
+            var terminator = Terminator.Reduction(reduction);
+
             foreach (var value in input)
             {
-                var terminator = reducer.Invoke(reduction, value);
-
+                terminator = reducer.Invoke(terminator.Value, value);
+                
                 if(terminator.Terminated)
                 {
                     return terminator;
                 }
             }
 
-            return reducer.Complete(reduction);
+            return reducer.Complete(terminator.Value);
         }
 
         public static IEnumerable<Result> Transduce<Input, Result>(
@@ -56,7 +59,7 @@ namespace TD
                 list.Clear();
             }
 
-            var completionReduction = reducer.Complete(new List<Result>());
+            var completionReduction = reducer.Complete(list);
             foreach (var result in completionReduction.Value)
             {
                 yield return result;
