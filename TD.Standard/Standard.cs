@@ -113,7 +113,16 @@ namespace TD
         /// <typeparam name="TInput">The type of the input.</typeparam>
         /// <param name="test">The test.</param>
         /// <returns>A terminating transducer.</returns>
-        public static ITransducer<TInput, TInput> Terminating<TInput>(Predicate<TInput> test) => new Terminating<TInput>(test);
+        public static ITransducer<TInput, TInput> Terminating<TInput>(Predicate<TInput> test) => 
+            new Terminating<TInput>(test);
+
+        /// <summary>
+        /// A transducer that terminates the input after first value passes through.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <returns>A terminating transducer</returns>
+        public static ITransducer<TInput, TInput> Terminating<TInput>() => 
+            Terminating<TInput>(_ => true);
 
         /// <summary>
         /// Relaxes input values from some derived type to a base type.
@@ -150,7 +159,14 @@ namespace TD
         /// <typeparam name="TResult">The type of the results of the original transducer.</typeparam>
         /// <param name="transducer">The transducer.</param>
         /// <returns>An erasing transducer.</returns>
-        public static ITransducer<TInput, object> Erasing<TInput, TResult>(this ITransducer<TInput, TResult> transducer) =>
-            transducer.Compose(Relaxing<TResult, object>());
+        public static ITransducer<TInput, object> Erasing<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer) =>
+                transducer.Compose(Relaxing<TResult, object>());
+
+        public static ITransducer<TInput, TResult> Catching<TInput, TResult, TException>(
+            ITransducer<TInput, TResult> success,
+            ITransducer<ExceptionalInput<TInput, TException>, TResult> exceptional)
+                where TException : Exception =>
+                    new CatchingTransducer<TInput, TResult, TException>(success, exceptional);
     }
 }

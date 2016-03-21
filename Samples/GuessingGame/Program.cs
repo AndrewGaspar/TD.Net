@@ -92,17 +92,22 @@ namespace GuessingGame
                 PrintUsage();
                 return;
             }
-            
-            var gamePlaying = Compose(
-                TryParsing<int>(),
-                Switching(
-                    TransducerSwitch.Create(
-                        nullable => nullable.HasValue,
-                        Compose(
-                            Dereferencing<int>(),
-                            game.Play(),
-                            Mapping<GuessingGameResult, Result>(gameResult => new GuessResult(gameResult)))),
-                    TransducerSwitch.Default(Mapping<int?, Result>(_ => new ErrorResult("Not a number!")))
+
+            new[] {
+                "Welcome to the Guessing Game!\n",
+                $"We've picked a value between {game.Min} and {game.Max}. Your job is to guess it.\n",
+                "We'll let you know if you're getting warmer or colder. Let's start!\n",
+                "Guess: "
+            }.Reduce(Console.Out, Relaxing<string, object>().Apply(TextIO.WriteReducer()));
+
+            var gameInstance = Compose(
+                Catching(
+                    Compose(
+                        Parsing<int>(),
+                        game.Play(),
+                        Mapping<GuessingGameResult, Result>(gameResult => new GuessResult(gameResult))),
+                    Mapping<ExceptionalInput<string, FormatException>, Result>(exc =>
+                        new ErrorResult($"Could not parse: {exc.Exception.Message}"))
                 ),
                 Terminating<Result>(result => result.IsEnd),
                 Switching(
@@ -114,14 +119,7 @@ namespace GuessingGame
                             .Compose(Formatting<string>("{0}\nGuess: ")))
                 ));
 
-            new[] {
-                "Welcome to the Guessing Game!\n",
-                $"We've picked a value between {game.Min} and {game.Max}. Your job is to guess it.\n",
-                "We'll let you know if you're getting warmer or colder. Let's start!\n",
-                "Guess: "
-            }.Reduce(Console.Out, Relaxing<string, object>().Apply(TextIO.WriteReducer()));
-
-            Console.In.Transduce(Console.Out, gamePlaying);
+            Console.In.Transduce(Console.Out, gameInstance);
 
             Console.ReadKey();
         }
