@@ -3,22 +3,36 @@ using System.Linq;
 
 namespace TD
 {
-    public static class Collection
+    /// <summary>
+    /// Helpers for using IEnumerable with transducers.
+    /// </summary>
+    public static class Enumerable
     {
-        public static IReducer<IList<Result>, Result> ListReducer<Result>() =>
-            Reducer.Make<IList<Result>, Result>((list, val) =>
+        /// <summary>
+        /// A reducer for adding elements to an IList.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the values in the IList.</typeparam>
+        /// <returns>An IReducer that pushes values to an IList.</returns>
+        public static IReducer<IList<TResult>, TResult> ListReducer<TResult>() =>
+            Reducer.Make<IList<TResult>, TResult>((list, val) =>
             {
                 list.Add(val);
                 return list;
             });
-    }
 
-    public static class Extensions
-    {
-        public static Terminator<Reduction> Reduce<Input, Reduction>(
-            this IEnumerable<Input> input,
-            Reduction reduction,
-            IReducer<Reduction, Input> reducer)
+        /// <summary>
+        /// Passes elements from an IEnumerable into the supplied reducer.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TReduction">The type of the reduction.</typeparam>
+        /// <param name="input">The input.</param>
+        /// <param name="reduction">The reduction.</param>
+        /// <param name="reducer">The reducer.</param>
+        /// <returns>A terminated reduction.</returns>
+        public static Terminator<TReduction> Reduce<TInput, TReduction>(
+            this IEnumerable<TInput> input,
+            TReduction reduction,
+            IReducer<TReduction, TInput> reducer)
         {
             var terminator = Terminator.Reduction(reduction);
 
@@ -26,7 +40,7 @@ namespace TD
             {
                 terminator = reducer.Invoke(terminator.Value, value);
                 
-                if(terminator.Terminated)
+                if(terminator.IsTerminated)
                 {
                     return terminator;
                 }
@@ -35,12 +49,25 @@ namespace TD
             return reducer.Complete(terminator.Value);
         }
 
-        public static IEnumerable<Result> Transduce<Input, Result>(
-            this IEnumerable<Input> input,
-            ITransducer<Input, Result> transuducer)
+        /// <summary>
+        /// Takes the input enumerable and produces a new enumerable by passing
+        /// each value through the supplied transducer one-by-one and yielding
+        /// the results.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="input">The input.</param>
+        /// <param name="transducer">The transducer.</param>
+        /// <returns>
+        /// An enumerable that is a sequence of values after the input is applied to 
+        /// the supplied transducer.
+        /// </returns>
+        public static IEnumerable<TResult> Transduce<TInput, TResult>(
+            this IEnumerable<TInput> input,
+            ITransducer<TInput, TResult> transducer)
         {
-            var reducer = transuducer.Apply(Collection.ListReducer<Result>());
-            var list = new List<Result>();
+            var reducer = transducer.Apply(Enumerable.ListReducer<TResult>());
+            var list = new List<TResult>();
 
             foreach (var value in input)
             {
@@ -51,7 +78,7 @@ namespace TD
                     yield return result;
                 }
 
-                if (reduction.Terminated)
+                if (reduction.IsTerminated)
                 {
                     yield break;
                 }
@@ -65,10 +92,19 @@ namespace TD
                 yield return result;
             }
         }
-        
-        public static IList<Result> Collect<Input, Result>(
-            this IEnumerable<Input> input,
-            ITransducer<Input, Result> transducer) =>
-            input.Reduce(new List<Result>(), transducer.Apply(Collection.ListReducer<Result>())).Value;
+
+        /// <summary>
+        /// Passes the values from the enumerable through the supplied transducer and
+        /// collects the results into a list.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="input">The input.</param>
+        /// <param name="transducer">The transducer.</param>
+        /// <returns>A list of the computed results.</returns>
+        public static IList<TResult> Collect<TInput, TResult>(
+            this IEnumerable<TInput> input,
+            ITransducer<TInput, TResult> transducer) =>
+            input.Reduce(new List<TResult>(), transducer.Apply(ListReducer<TResult>())).Value;
     }
 }

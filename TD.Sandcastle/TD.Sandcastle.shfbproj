@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- The configuration and platform will be used to determine which assemblies to include from solution and
+				 project documentation sources -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>2a653df1-697e-4f5f-b24a-3d574c96778f</ProjectGuid>
+    <SHFBSchemaVersion>2015.6.5.0</SHFBSchemaVersion>
+    <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
+    <AssemblyName>TD.Sandcastle</AssemblyName>
+    <RootNamespace>TD.Sandcastle</RootNamespace>
+    <Name>TD.Sandcastle</Name>
+    <!-- SHFB properties -->
+    <FrameworkVersion>.NET Portable Library 4.5</FrameworkVersion>
+    <OutputPath>.\Help\</OutputPath>
+    <HtmlHelpName>TD.Sandcastle</HtmlHelpName>
+    <Language>en-US</Language>
+    <TransformComponentArguments>
+      <Argument Key="logoFile" Value="Help.png" xmlns="" />
+      <Argument Key="logoHeight" Value="" xmlns="" />
+      <Argument Key="logoWidth" Value="" xmlns="" />
+      <Argument Key="logoAltText" Value="" xmlns="" />
+      <Argument Key="logoPlacement" Value="left" xmlns="" />
+      <Argument Key="logoAlignment" Value="left" xmlns="" />
+      <Argument Key="maxVersionParts" Value="" xmlns="" />
+    </TransformComponentArguments>
+    <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
+    <HelpFileFormat>Markdown</HelpFileFormat>
+    <IndentHtml>False</IndentHtml>
+    <KeepLogFile>True</KeepLogFile>
+    <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
+    <CleanIntermediates>True</CleanIntermediates>
+    <DocumentationSources>
+      <DocumentationSource sourceFile="..\TD.Core\TD.Core.csproj" />
+      <DocumentationSource sourceFile="..\TD.Standard\TD.Standard.csproj" />
+    </DocumentationSources>
+    <HelpFileVersion>1.0.0.0</HelpFileVersion>
+    <MaximumGroupParts>2</MaximumGroupParts>
+    <NamespaceGrouping>False</NamespaceGrouping>
+    <SyntaxFilters>C#, F#</SyntaxFilters>
+    <SdkLinkTarget>Blank</SdkLinkTarget>
+    <RootNamespaceContainer>False</RootNamespaceContainer>
+    <PresentationStyle>Markdown</PresentationStyle>
+    <Preliminary>False</Preliminary>
+    <NamingMethod>MemberName</NamingMethod>
+    <HelpTitle>A Sandcastle Documented Class Library</HelpTitle>
+    <ContentPlacement>AboveNamespaces</ContentPlacement>
+    <ComponentConfigurations />
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="TD" isDocumented="True">The TD library is a transducer library for CLR languages.</NamespaceSummaryItem>
+    </NamespaceSummaries>
+  </PropertyGroup>
+  <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
+			 the build.  The others are optional common platform types that may appear. -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Content" />
+    <Folder Include="Content\VersionHistory" />
+    <Folder Include="icons" />
+    <Folder Include="media" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\VersionHistory\v1.0.0.0.aml" />
+    <None Include="Content\VersionHistory\VersionHistory.aml" />
+    <None Include="Content\Welcome.aml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ContentLayout Include="ContentLayout.content" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icons\Help.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TD.Core\TD.Core.csproj">
+      <Name>TD.Core</Name>
+      <Project>{d0692ffc-d78d-462c-a82e-2df87950bb60}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\TD.Standard\TD.Standard.csproj">
+      <Name>TD.Standard</Name>
+      <Project>{69a1edac-8915-4d75-b9d9-79d9e690f3b6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- Import the SHFB build targets -->
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />
+  <!-- The pre-build and post-build event properties must appear *after* the targets file import in order to be
+			 evaluated correctly. -->
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+</Project>

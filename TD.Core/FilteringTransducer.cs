@@ -4,10 +4,9 @@ namespace TD
 {
     internal class FilteringTransducer<Input> : ITransducer<Input, Input>
     {
-        private class FilteringReducer<Reduction> : DefaultCompletionReducer<Reduction, Input>
+        private class FilteringReducer<Reduction> : DefaultCompletionReducer<Reduction, Input, Input>
         {
             public FilteringTransducer<Input> Transducer { get; private set; }
-            protected IReducer<Reduction, Input> Reducer { get { return Completion as IReducer<Reduction, Input>; } }
 
             public FilteringReducer(
                 FilteringTransducer<Input> transducer,
@@ -17,7 +16,7 @@ namespace TD
             }
 
             public override Terminator<Reduction> Invoke(Reduction reduction, Input value) =>
-                Transducer.Test(value) ? Reducer.Invoke(reduction, value) : Terminator.Reduction(reduction);
+                Transducer.Test(value) ? Next.Invoke(reduction, value) : Terminator.Reduction(reduction);
         }
 
         public Predicate<Input> Test { get; private set; }

@@ -2,7 +2,7 @@
 
 namespace TD
 {
-    public class Terminating<T> : ITransducer<T, T>
+    internal class Terminating<T> : ITransducer<T, T>
     {
         class Reducer<Reduction> : IReducer<Reduction, T>
         {

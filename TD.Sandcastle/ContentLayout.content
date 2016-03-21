@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Topics>
+  <Topic id="5851fa96-35a0-467d-be63-0a193e18d31b" visible="True" isDefault="true" isSelected="true" title="Welcome to the [TODO: Add project name]">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="Welcome" />
+    </HelpKeywords>
+  </Topic>
+  <Topic id="3ff3749c-4271-443f-8a74-7c6c3ee10142" visible="True" isExpanded="true" title="Version History">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="version, history" />
+    </HelpKeywords>
+    <Topic id="bd28d8c8-2259-445c-83c8-4d9804008866" visible="True" title="Version 1.0.0.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="version, 1.0.0.0" />
+      </HelpKeywords>
+    </Topic>
+  </Topic>
+</Topics>

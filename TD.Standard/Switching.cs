@@ -4,28 +4,66 @@ using System.Linq;
 
 namespace TD
 {
+    /// <summary>
+    /// Factory functions for creating components of a switching transducer.
+    /// </summary>
     public static class TransducerSwitch
     {
-        public static TransducerSwitch<From, To> Create<From, To>(Predicate<From> test, ITransducer<From, To> transducer) =>
-            new TransducerSwitch<From, To>(test, transducer);
+        /// <summary>
+        /// Creates a switch for a Switching transducer that pushes results into the supplied transducer if
+        /// an unmatched input matches the supplied test.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="test">The test.</param>
+        /// <param name="transducer">The transducer.</param>
+        /// <returns>A switch for a Switching transducer.</returns>
+        public static TransducerSwitch<TInput, TResult> Create<TInput, TResult>(Predicate<TInput> test, ITransducer<TInput, TResult> transducer) =>
+            new TransducerSwitch<TInput, TResult>(test, transducer);
 
-        public static TransducerSwitch<From, To> Default<From, To>(ITransducer<From, To> transducer) =>
+        /// <summary>
+        /// Creates the default switch for a Switching transducer. Any input that isn't captured by a
+        /// previous switch in the Switching transducer will fall into this transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="transducer">The transducer.</param>
+        /// <returns>A default switch for a Switching transducer.</returns>
+        public static TransducerSwitch<TInput, TResult> Default<TInput, TResult>(ITransducer<TInput, TResult> transducer) =>
             Create(_ => true, transducer);
     }
 
-    public class TransducerSwitch<From, To>
+    /// <summary>
+    /// A switch to be used as part of a Switching transducer.
+    /// </summary>
+    /// <typeparam name="TInput">The type of the input.</typeparam>
+    /// <typeparam name="TResult">The type of the result.</typeparam>
+    public class TransducerSwitch<TInput, TResult>
     {
-        public TransducerSwitch(Predicate<From> test, ITransducer<From, To> transducer)
+        internal TransducerSwitch(Predicate<TInput> test, ITransducer<TInput, TResult> transducer)
         {
             Test = test;
             Transducer = transducer;
         }
 
-        public Predicate<From> Test { get; private set; }
-        public ITransducer<From, To> Transducer { get; private set; }
+        /// <summary>
+        /// Gets the switch's test.
+        /// </summary>
+        /// <value>
+        /// The switch's test.
+        /// </value>
+        public Predicate<TInput> Test { get; private set; }
+
+        /// <summary>
+        /// Gets the switch's transducer.
+        /// </summary>
+        /// <value>
+        /// The transducer.
+        /// </value>
+        public ITransducer<TInput, TResult> Transducer { get; private set; }
     }
 
-    public class Switching<From, To> : ITransducer<From, To>
+    internal class Switching<From, To> : ITransducer<From, To>
     {
         class SplittingReducer<Reduction> : IReducer<Reduction, From>
         {
@@ -44,7 +82,7 @@ namespace TD
 
                 private bool CheckTermination(Terminator<Reduction> terminator)
                 {
-                    if (terminator.Terminated)
+                    if (terminator.IsTerminated)
                     {
                         foreach (var reducer in splitter.reducers)
                         {
@@ -117,7 +155,7 @@ namespace TD
                 {
                     var terminator = reducer.Reducer.Invoke(reduction, value);
 
-                    if (terminator.Terminated)
+                    if (terminator.IsTerminated)
                     {
                         reducer.IsTerminated = true;
                     }

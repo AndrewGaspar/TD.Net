@@ -4,21 +4,19 @@ namespace TD
 {
     internal class MappingTransducer<From, To> : ITransducer<From, To>
     {
-        private class MappingReducer<Reduction> : DefaultCompletionReducer<Reduction, From>
+        private class MappingReducer<Reduction> : DefaultCompletionReducer<Reduction, From, To>
         {
             public MappingTransducer<From, To> Transducer { get; private set; }
-            public IReducer<Reduction, To> Reducer { get; private set; }
 
             public MappingReducer(
                 MappingTransducer<From, To> transducer,
                 IReducer<Reduction, To> reducer) : base(reducer)
             {
                 Transducer = transducer;
-                Reducer = reducer;
             }
 
             public override Terminator<Reduction> Invoke(Reduction reduction, From value) =>
-                Reducer.Invoke(reduction, Transducer.MappingFunction(value));
+                Next.Invoke(reduction, Transducer.MappingFunction(value));
         }
 
         public Func<From, To> MappingFunction { get; private set; }

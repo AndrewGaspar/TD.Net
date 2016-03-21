@@ -9,7 +9,7 @@ namespace TD.Test.Common
         {
             var termination = input.Reduce(0, transducer.Apply(new VerifySequence<U>(result)));
 
-            Assert.IsTrue(termination.Terminated);
+            Assert.IsTrue(termination.IsTerminated);
         }
     }
 }

@@ -17,9 +17,22 @@ namespace TD
         public Terminator<Reduction> Complete(Reduction reduction) => Terminator.Reduction(reduction);
     }
 
+    /// <summary>
+    /// A static class for functions related to creating Reducers.
+    /// </summary>
+    /// <seealso cref="IReducer{TReduction, TInput}"/>
     public static class Reducer
     {
-        public static IReducer<Reduction, Input> Make<Reduction, Input>(Func<Reduction, Input, Reduction> func) =>
-            new FuncReducer<Reduction, Input>(func);
+        /// <summary>
+        /// Produces an IReducer from an 
+        /// <see cref="System.Linq.Enumerable.Aggregate{TSource, TAccumulate, TResult}(System.Collections.Generic.IEnumerable{TSource}, TAccumulate, Func{TAccumulate, TSource, TAccumulate}, Func{TAccumulate, TResult})"/>-like 
+        /// function. This reducer should not be stateful outside of the state of Reduction.
+        /// </summary>
+        /// <typeparam name="TReduction">The type of the reduction.</typeparam>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <param name="func">A reducing/aggregating function.</param>
+        /// <returns>An IReducer that feeds input to the supplied function.</returns>
+        public static IReducer<TReduction, TInput> Make<TReduction, TInput>(Func<TReduction, TInput, TReduction> func) =>
+            new FuncReducer<TReduction, TInput>(func);
     }
 }
