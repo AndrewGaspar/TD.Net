@@ -48,7 +48,7 @@
     <Compile Include="FilteringTransducer.cs" />
     <Compile Include="ComposingTransducer.cs" />
     <Compile Include="Reducer.cs" />
-    <Compile Include="Transducer.cs" />
+    <Compile Include="Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

@@ -2,7 +2,7 @@
 using System.Linq;
 using TD.Test.Common;
 
-namespace TD.Core.Test
+namespace TD.Test
 {
     [TestClass]
     public class MappingTests
@@ -13,7 +13,7 @@ namespace TD.Core.Test
             Verify.SequenceEquivalent(
                 Enumerable.Range(0, 5),
                 Enumerable.Range(1, 5).ToArray(),
-                Transducer.Mapping<int, int>(x => x + 1));
+                Core.Mapping<int, int>(x => x + 1));
         }
 
         [TestMethod]
@@ -22,7 +22,7 @@ namespace TD.Core.Test
             Verify.SequenceEquivalent(
                 Enumerable.Range(0, 5),
                 Enumerable.Range(-1, 5).ToArray(),
-                Transducer.Mapping<int, int>(x => x - 1));
+                Core.Mapping<int, int>(x => x - 1));
         }
 
         [TestMethod]
@@ -31,7 +31,7 @@ namespace TD.Core.Test
             Verify.SequenceEquivalent(
                 Enumerable.Range(0, 5),
                 new[] { "0", "1", "2", "3", "4" },
-                Transducer.Mapping<int, string>(x => x.ToString()));
+                Core.Mapping<int, string>(x => x.ToString()));
         }
     }
 }

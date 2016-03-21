@@ -6,7 +6,7 @@
     <ProjectGuid>{E546AA63-A494-40F0-A951-2A03AD559BB4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TD.Core.Test</RootNamespace>
+    <RootNamespace>TD.Test</RootNamespace>
     <AssemblyName>TD.Core.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

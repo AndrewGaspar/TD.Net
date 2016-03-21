@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using static TD.Transducer;
+using static TD.Core;
 
 namespace TD
 {

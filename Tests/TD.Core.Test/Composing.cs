@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using TD.Test.Common;
-using static TD.Transducer;
+using static TD.Core;
 
-namespace TD.Core.Test
+namespace TD.Test
 {
     [TestClass]
     public class ComposingTests

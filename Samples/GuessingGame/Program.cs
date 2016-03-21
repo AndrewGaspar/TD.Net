@@ -1,7 +1,7 @@
 ﻿using System;
 using TD;
+using static TD.Core;
 using static TD.Standard;
-using static TD.Transducer;
 
 namespace GuessingGame
 {
