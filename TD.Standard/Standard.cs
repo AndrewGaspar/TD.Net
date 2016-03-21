@@ -16,7 +16,38 @@ namespace TD
         /// </summary>
         /// <typeparam name="TResult">The type of the parsed values.</typeparam>
         /// <returns>A transducer that produces values for parse-able values and null for non-parse-able values.</returns>
-        public static ITransducer<string, TResult?> TryParsing<TResult>() where TResult : struct => new TryParsing<TResult>();
+        public static ITransducer<string, TResult?> TryParsing<TResult>() where TResult : struct => 
+            new TryParsingTransducer<TResult>();
+
+        /// <summary>
+        /// Produces a transducer that produces values parsed from the results of the supplied transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="transducer">The transducer.</param>
+        /// <returns>A transducer that produces parsed values.</returns>
+        public static ITransducer<TInput, TResult?> TryParsing<TInput, TResult>(
+            this ITransducer<TInput, string> transducer) where TResult : struct =>
+                transducer.Compose(TryParsing<TResult>());
+
+        /// <summary>
+        /// Creates a transducer that parses the input tokens or throws.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <returns>A transducer that produces results parsed from the input.</returns>
+        public static ITransducer<string, TResult> Parsing<TResult>() where TResult : struct => 
+            new ParsingTransducer<TResult>();
+
+        /// <summary>
+        /// Produces a transducer that parses the results of the supplied transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="transducer">The transducer.</param>
+        /// <returns>A transducer whose results are parsed from the results of the supplied transducer.</returns>
+        public static ITransducer<TInput, TResult> Parsing<TInput, TResult>(
+            this ITransducer<TInput, string> transducer) where TResult : struct =>
+            transducer.Compose(Parsing<TResult>());
 
         /// <summary>
         /// Takes the value from a null-able value. Does not guard by checking if it has a value.
@@ -103,7 +134,7 @@ namespace TD
         /// <returns>A transducer that produces values of a relaxed type.</returns>
         public static ITransducer<TInput, TBase> Relaxing<TInput, TDerived, TBase>(this ITransducer<TInput, TDerived> transducer) 
             where TDerived : TBase => 
-            transducer.Compose(Relaxing<TDerived, TBase>());
+                transducer.Compose(Relaxing<TDerived, TBase>());
 
         /// <summary>
         /// Creates a transducer that erases the type of the input values.
