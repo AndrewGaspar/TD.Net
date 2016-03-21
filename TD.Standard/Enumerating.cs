@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace TD
 {
     /// <summary>
     /// Helpers for using IEnumerable with transducers.
     /// </summary>
-    public static class Enumerable
+    public static class Enumerating
     {
         /// <summary>
         /// A reducer for adding elements to an IList.
@@ -66,7 +65,7 @@ namespace TD
             this IEnumerable<TInput> input,
             ITransducer<TInput, TResult> transducer)
         {
-            var reducer = transducer.Apply(Enumerable.ListReducer<TResult>());
+            var reducer = transducer.Apply(Enumerating.ListReducer<TResult>());
             var list = new List<TResult>();
 
             foreach (var value in input)
