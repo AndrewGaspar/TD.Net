@@ -163,6 +163,16 @@ namespace TD
             this ITransducer<TInput, TResult> transducer) =>
                 transducer.Compose(Relaxing<TResult, object>());
 
+        /// <summary>
+        /// Instantiates a transducer that passes values to a supplied 'success' transducer and catches exceptions in subsequent 
+        /// reductions and passes the result to an exception handling transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The input type</typeparam>
+        /// <typeparam name="TResult">The result of types produced by both the success and exceptional transducers</typeparam>
+        /// <typeparam name="TException">The type of exceptions to catch.</typeparam>
+        /// <param name="success">The primary transducer that input is passed to.</param>
+        /// <param name="exceptional">The transducer that handles exceptional cases.</param>
+        /// <returns></returns>
         public static ITransducer<TInput, TResult> Catching<TInput, TResult, TException>(
             ITransducer<TInput, TResult> success,
             ITransducer<ExceptionalInput<TInput, TException>, TResult> exceptional)
