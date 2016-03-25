@@ -187,5 +187,17 @@ namespace TD
         /// <returns>A casting transducer.</returns>
         public static ITransducer<TBase, TDerived> Casting<TBase, TDerived>() where TDerived : TBase =>
             Mapping<TBase, TDerived>(x => (TDerived)x);
+
+        /// <summary>
+        /// Produces a transducer that composes the input transducer and restricts the type of the results from it.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the new transducer</typeparam>
+        /// <typeparam name="TBase">The original type of the transducer</typeparam>
+        /// <typeparam name="TDerived">The restricted type of the transducer</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <returns>A new transducer that restricts the produced type</returns>
+        public static ITransducer<TInput, TDerived> Casting<TInput, TBase, TDerived>(
+            this ITransducer<TInput, TBase> transducer) where TDerived : TBase =>
+                transducer.Compose(Casting<TBase, TDerived>());
     }
 }
