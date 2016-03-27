@@ -199,5 +199,97 @@ namespace TD
         public static ITransducer<TInput, TDerived> Casting<TInput, TBase, TDerived>(
             this ITransducer<TInput, TBase> transducer) where TDerived : TBase =>
                 transducer.Compose(Casting<TBase, TDerived>());
+
+        /// <summary>
+        /// Any value applied to this transducer will be passed through the supplied transducer. The resulting
+        /// value will first be applied to the given reducing function, then will be re-applied to the internal
+        /// reducing function.
+        /// </summary>
+        /// <typeparam name="T">The type of the input and result.</typeparam>
+        /// <param name="operation">The feedback operation</param>
+        /// <returns>A feedback transducer</returns>
+        public static ITransducer<T, T> Feedback<T>(ITransducer<T, T> operation) => new Feedback<T>(operation);
+
+        /// <summary>
+        /// Produces a feedback transducer composed with this transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the new transducer</typeparam>
+        /// <typeparam name="TResult">The result and feedback type</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <param name="operation">The feedback operation.</param>
+        /// <returns>A feedback transducer</returns>
+        public static ITransducer<TInput, TResult> Feedback<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer,
+            ITransducer<TResult, TResult> operation) => transducer.Compose(Feedback(operation));
+
+        /// <summary>
+        /// Takes multiple values at a time. Each input pushes previous values out of the window of 
+        /// values supplied. Does not produce a window until it's filled.
+        /// </summary>
+        /// <typeparam name="T">The input type</typeparam>
+        /// <param name="windowSize">How large the window to fill is</param>
+        /// <returns>A sliding transducer</returns>
+        public static ITransducer<T, IList<T>> Sliding<T>(int windowSize) => new Sliding<T>(windowSize);
+
+        /// <summary>
+        /// Produces a transducer that takes multiple values from this transducer at a time.
+        /// Each input pushes previous values out of the window of values supplied. Does not 
+        /// produce a window until it's filled.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the original and new transducer</typeparam>
+        /// <typeparam name="TResult">The result of the original transducer</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <param name="windowSize">The size of the produced window</param>
+        /// <returns>A sliding transducer</returns>
+        public static ITransducer<TInput, IList<TResult>> Sliding<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer,
+            int windowSize) => transducer.Compose(Sliding<TResult>(windowSize));
+
+        /// <summary>
+        /// Creates a transducer that passes all input through all of the supplied transducers.
+        /// </summary>
+        /// <typeparam name="TInput">The input to each transducer</typeparam>
+        /// <typeparam name="TResult">The result of each transducer</typeparam>
+        /// <param name="transducers">The multiplexed transducers</param>
+        /// <returns>A transducer that multiplexes the input</returns>
+        public static ITransducer<TInput, TResult> Multiplexing<TInput, TResult>(
+            IList<ITransducer<TInput, TResult>> transducers) => new Multiplexing<TInput, TResult>(transducers);
+
+        /// <summary>
+        /// Creates a transducer that passes all input through all of the supplied transducers.
+        /// </summary>
+        /// <typeparam name="TInput">The input to each transducer</typeparam>
+        /// <typeparam name="TResult">The result of each transducer</typeparam>
+        /// <param name="transducers">The multiplexed transducers</param>
+        /// <returns>A transducer that multiplexes the input</returns>
+        public static ITransducer<TInput, TResult> Multiplexing<TInput, TResult>(
+            params ITransducer<TInput, TResult>[] transducers) => Multiplexing(transducers as IList<ITransducer<TInput, TResult>>);
+
+        /// <summary>
+        /// Creates a transducer that passes all input through all of the supplied transducers.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the original transducer</typeparam>
+        /// <typeparam name="TMultiInput">The input to the multi-transducers</typeparam>
+        /// <typeparam name="TResult">The result of each transducer</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <param name="transducers">The multiplexed transducers</param>
+        /// <returns>A transducer that multiplexes the original transducers' results</returns>
+        public static ITransducer<TInput, TResult> Multiplexing<TInput, TMultiInput, TResult>(
+            this ITransducer<TInput, TMultiInput> transducer,
+            IList<ITransducer<TMultiInput, TResult>> transducers) => transducer.Compose(Multiplexing(transducers));
+
+
+        /// <summary>
+        /// Creates a transducer that passes all input through all of the supplied transducers.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the original transducer</typeparam>
+        /// <typeparam name="TMultiInput">The input to the multi-transducers</typeparam>
+        /// <typeparam name="TResult">The result of each transducer</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <param name="transducers">The multiplexed transducers</param>
+        /// <returns>A transducer that multiplexes the original transducers' results</returns>
+        public static ITransducer<TInput, TResult> Multiplexing<TInput, TMultiInput, TResult>(
+            this ITransducer<TInput, TMultiInput> transducer,
+            params ITransducer<TMultiInput, TResult>[] transducers) => transducer.Compose(Multiplexing(transducers));
     }
 }
