@@ -40,12 +40,12 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PassingTransducer.cs" />
+    <Compile Include="Passing.cs" />
     <Compile Include="ITransducer.cs" />
     <Compile Include="IReducer.cs" />
     <Compile Include="Terminator.cs" />
-    <Compile Include="MappingTransducer.cs" />
-    <Compile Include="FilteringTransducer.cs" />
+    <Compile Include="Mapping.cs" />
+    <Compile Include="Filtering.cs" />
     <Compile Include="ComposingTransducer.cs" />
     <Compile Include="Reducer.cs" />
     <Compile Include="Core.cs" />

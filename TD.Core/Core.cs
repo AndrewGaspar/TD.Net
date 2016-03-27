@@ -16,7 +16,7 @@ namespace TD
         /// <param name="map">The mapping function to use.</param>
         /// <returns>A transducer that maps input values to result values.</returns>
         public static ITransducer<TInput, TResult> Mapping<TInput, TResult>(Func<TInput, TResult> map) =>
-            new MappingTransducer<TInput, TResult>(map);
+            new Mapping<TInput, TResult>(map);
 
         /// <summary>
         /// Creates a new transducer that composes some transducer with a transducer that maps
@@ -38,7 +38,7 @@ namespace TD
         /// <param name="test">The test. Returning true passes the input through.</param>
         /// <returns>A transducer that filters inputs based on the predicate.</returns>
         public static ITransducer<TInput, TInput> Filtering<TInput>(Predicate<TInput> test) =>
-            new FilteringTransducer<TInput>(test);
+            new Filtering<TInput>(test);
 
         /// <summary>
         /// Produces a new transducer that composes the supplied transducer with a filtering transducer.
@@ -56,7 +56,7 @@ namespace TD
         /// </summary>
         /// <typeparam name="TInput">The type of the transducers' input and result.</typeparam>
         /// <returns>A transducer that passes all input through.</returns>
-        public static ITransducer<TInput, TInput> Passing<TInput>() => new PassingTransducer<TInput>();
+        public static ITransducer<TInput, TInput> Passing<TInput>() => new Passing<TInput>();
 
         /// <summary>
         /// Composes two transducers together by attaching the output of the first to the input of the second.

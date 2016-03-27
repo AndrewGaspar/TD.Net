@@ -1,6 +1,6 @@
 ﻿namespace TD
 {
-    internal class PassingTransducer<T> : ITransducer<T, T>
+    internal class Passing<T> : ITransducer<T, T>
     {
         public IReducer<Reduction, T> Apply<Reduction>(IReducer<Reduction, T> next) => next;
     }
