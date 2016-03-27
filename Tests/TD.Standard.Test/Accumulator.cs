@@ -7,10 +7,10 @@ namespace TD.Test
 {
     internal static class Extensions
     {
-        public static T CheckedAccumulate<T>(this IList<T> input) => 
+        public static T CheckedAccumulate<T>(this IList<T> input) where T : struct => 
             input.Reduce(default(T), Accumulator.Checked<T>()).Value;
 
-        public static T UncheckedAccumulate<T>(this IList<T> input) =>
+        public static T UncheckedAccumulate<T>(this IList<T> input) where T : struct =>
             input.Reduce(default(T), Accumulator.Unchecked<T>()).Value;
     }
 
@@ -20,25 +20,25 @@ namespace TD.Test
         [TestMethod]
         public void CheckedByte()
         {
-            Verify.Throws<OverflowException>(() => new byte[] { 255, 1 }.CheckedAccumulate());
+            Verify.Throws<OverflowException>(() => new byte[] { 0xFF, 1 }.CheckedAccumulate());
         }
 
         [TestMethod]
         public void UncheckedByte()
         {
-            Assert.AreEqual<byte>(0, new byte[] { 255, 1 }.UncheckedAccumulate());
+            Assert.AreEqual<byte>(0, new byte[] { 0xFF, 1 }.UncheckedAccumulate());
         }
 
         [TestMethod]
         public void CheckedSByte()
         {
-            Verify.Throws<OverflowException>(() => new sbyte[] { 127, 1 }.CheckedAccumulate());
+            Verify.Throws<OverflowException>(() => new sbyte[] { 0x7F, 1 }.CheckedAccumulate());
         }
 
         [TestMethod]
         public void UncheckedSByte()
         {
-            Assert.AreEqual<sbyte>(-128, new sbyte[] { 127, 1 }.UncheckedAccumulate());
+            Assert.AreEqual<sbyte>(-128, new sbyte[] { 0x7F, 1 }.UncheckedAccumulate());
         }
 
         [TestMethod]

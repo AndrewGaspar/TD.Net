@@ -152,7 +152,7 @@ namespace TD
 
     public static class Accumulator
     {
-        public static IReducer<T, T> Unchecked<T>()
+        public static IReducer<T, T> Unchecked<T>() where T : struct
         {
             if (typeof(T) == typeof(sbyte)) return new UncheckedSByteAccumulator().As<T>();
             if (typeof(T) == typeof(byte)) return new UncheckedByteAccumulator().As<T>();
@@ -169,7 +169,7 @@ namespace TD
             throw new NotImplementedException($"{nameof(Accumulator.Unchecked)} not implemented for type {typeof(T)}.");
         }
 
-        public static IReducer<T, T> Checked<T>()
+        public static IReducer<T, T> Checked<T>() where T : struct
         {
             if (typeof(T) == typeof(sbyte)) return new CheckedSByteAccumulator().As<T>();
             if (typeof(T) == typeof(byte)) return new CheckedByteAccumulator().As<T>();

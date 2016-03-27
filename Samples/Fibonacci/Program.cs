@@ -16,6 +16,6 @@ namespace Fibonacci
             );
 
         static void Main(string[] args) =>
-            new ulong[] { 0, 1 }.Reduce(Console.Out, Fibonacci<ulong>().Apply(TextIO.WriteLineReducer<ulong>()));
+            new[] { 0ul, 1ul }.Reduce(Console.Out, Fibonacci<ulong>().Apply(TextIO.WriteLineReducer<ulong>()));
     }
 }
