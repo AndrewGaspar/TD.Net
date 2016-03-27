@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 
 namespace TD.Test.Common
@@ -10,6 +11,22 @@ namespace TD.Test.Common
             var termination = input.Reduce(0, transducer.Apply(new VerifySequence<U>(result)));
 
             Assert.IsTrue(termination.IsTerminated);
+        }
+
+        public static void Throws<TException>(Action action) where TException : Exception
+        {
+            var threw = false;
+
+            try
+            {
+                action();
+            }
+            catch (TException)
+            {
+                threw = true;
+            }
+
+            Assert.IsTrue(threw);
         }
     }
 }
