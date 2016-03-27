@@ -1,13 +1,16 @@
-﻿// Learn more about F# at http://fsharp.org
-// See the 'F# Tutorial' project for more help.
+﻿open System
+open TD
 
-open TD;
+let red init reducer input = (Enumerating.Reduce (input, init, reducer)).Value
+let acc input = input |> red Unchecked.defaultof<_> (Accumulator.Checked())
 
-let parse = Standard.Parsing<uint64>()
-let inc = Core.Mapping(fun (x: uint64) -> x + 1UL)
-let even = Core.Filtering(fun x -> x % 2UL = 0UL)
+let fib() = Standard.Multiplexing<_, _>(
+                Core.Passing(),
+                Standard.Feedback(
+                    Standard.Sliding(2).Mapping(fun win -> win |> red Unchecked.defaultof<_> (Accumulator.Checked()))
+                ))
 
 [<EntryPoint>]
 let main argv = 
-    System.Console.In.Transduce(System.Console.Out, parse.Compose(inc).Compose(even));
+    [|0UL;1UL|].Reduce(Console.Out, fib().Apply(TextIO.WriteLineReducer<_>())) |> ignore
     0 // return an integer exit code
