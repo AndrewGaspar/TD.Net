@@ -177,7 +177,7 @@ namespace TD
             ITransducer<TInput, TResult> success,
             ITransducer<ExceptionalInput<TInput, TException>, TResult> exceptional)
                 where TException : Exception =>
-                    new CatchingTransducer<TInput, TResult, TException>(success, exceptional);
+                    new Catching<TInput, TResult, TException>(success, exceptional);
 
         /// <summary>
         /// Casts a value from some base type to a derived type.

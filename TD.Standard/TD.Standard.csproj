@@ -42,7 +42,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CatchingTransducer.cs" />
+    <Compile Include="Catching.cs" />
     <Compile Include="Enumerating.cs" />
     <Compile Include="Feedback.cs" />
     <Compile Include="Multiplexing.cs" />
