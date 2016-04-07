@@ -22,4 +22,9 @@
         /// <returns>A new reducer that wraps the supplied reducer and takes as input type TResult.</returns>
         IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next);
     }
+
+    public interface IAsyncTransducer<TInput, TResult>
+    {
+        IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next);
+    }
 }

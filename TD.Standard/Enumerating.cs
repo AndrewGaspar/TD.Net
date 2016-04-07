@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TD
 {
@@ -46,6 +47,26 @@ namespace TD
             }
 
             return reducer.Complete(terminator.Value);
+        }
+
+        public static async Task<Terminator<TReduction>> ReduceAsync<TInput, TReduction>(
+            this IEnumerable<TInput> input,
+            TReduction reduction,
+            IAsyncReducer<TReduction, TInput> reducer)
+        {
+            var terminator = Terminator.Reduction(reduction);
+
+            foreach (var value in input)
+            {
+                terminator = await reducer.InvokeAsync(terminator.Value, value).ConfigureAwait(false);
+
+                if (terminator.IsTerminated)
+                {
+                    return terminator;
+                }
+            }
+
+            return await reducer.CompleteAsync(terminator.Value).ConfigureAwait(false);
         }
 
         /// <summary>

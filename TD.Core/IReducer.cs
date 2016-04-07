@@ -1,4 +1,7 @@
-﻿namespace TD
+﻿using System;
+using System.Threading.Tasks;
+
+namespace TD
 {
     /// <summary>
     /// IReducer represents a computation that takes some value and returns a reduced aggregate value.
@@ -29,6 +32,29 @@
         /// <param name="reduction">The current reduction value.</param>
         /// <returns>A wrapped reduction.</returns>
         Terminator<TReduction> Complete(TReduction reduction);
+    }
+
+    public interface IAsyncReducer<TReduction, TInput>
+    {
+        Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value);
+
+        Task<Terminator<TReduction>> CompleteAsync(TReduction reduction);
+    }
+
+    internal class AsyncConvertedReducer<TReduction, TInput> : IAsyncReducer<TReduction, TInput>
+    {
+        private readonly IReducer<TReduction, TInput> Reducer;
+
+        public AsyncConvertedReducer(IReducer<TReduction, TInput> reducer)
+        {
+            Reducer = reducer;
+        }
+
+        public Task<Terminator<TReduction>> CompleteAsync(TReduction reduction) =>
+            Task.FromResult(Reducer.Complete(reduction));
+
+        public Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value) =>
+            Task.FromResult(Reducer.Invoke(reduction, value));
     }
 
     /// <summary>

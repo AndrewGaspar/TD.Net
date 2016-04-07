@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TD
 {
@@ -27,6 +28,39 @@ namespace TD
         }
 
         public IReducer<Reduction, From> Apply<Reduction>(IReducer<Reduction, To> reducer) =>
+            new Reducer<Reduction>(MappingFunction, reducer);
+    }
+
+    internal class AsyncMapping<From, To> : IAsyncTransducer<From, To>
+    {
+        private class Reducer<TReduction> : IAsyncReducer<TReduction, From>
+        {
+            private readonly Func<From, Task<To>> MappingFunction;
+            private readonly IAsyncReducer<TReduction, To> Next;
+
+            public Reducer(
+                Func<From, Task<To>> mappingFunction,
+                IAsyncReducer<TReduction, To> reducer)
+            {
+                MappingFunction = mappingFunction;
+                Next = reducer;
+            }
+
+            public Task<Terminator<TReduction>> CompleteAsync(TReduction reduction) =>
+                Next.CompleteAsync(reduction);
+
+            public async Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, From value) =>
+                await Next.InvokeAsync(reduction, await MappingFunction(value).ConfigureAwait(false)).ConfigureAwait(false);
+        }
+
+        public Func<From, Task<To>> MappingFunction { get; private set; }
+
+        public AsyncMapping(Func<From, Task<To>> func)
+        {
+            MappingFunction = func;
+        }
+
+        public IAsyncReducer<Reduction, From> Apply<Reduction>(IAsyncReducer<Reduction, To> reducer) =>
             new Reducer<Reduction>(MappingFunction, reducer);
     }
 }

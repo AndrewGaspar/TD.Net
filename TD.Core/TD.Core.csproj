@@ -46,7 +46,7 @@
     <Compile Include="Terminator.cs" />
     <Compile Include="Mapping.cs" />
     <Compile Include="Filtering.cs" />
-    <Compile Include="ComposingTransducer.cs" />
+    <Compile Include="Composing.cs" />
     <Compile Include="Reducer.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

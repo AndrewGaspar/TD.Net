@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TD
 {
@@ -31,6 +32,9 @@ namespace TD
         public static ITransducer<TInput, TResult> Mapping<TInput, TMedium, TResult>(
             this ITransducer<TInput, TMedium> transducer, Func<TMedium, TResult> map) => Compose(transducer, Mapping(map));
 
+        public static IAsyncTransducer<TInput, TResult> AsyncMapping<TInput, TResult>(Func<TInput, Task<TResult>> map) =>
+            new AsyncMapping<TInput, TResult>(map);
+
         /// <summary>
         /// Filters input values based on the supplied filtering functions.
         /// </summary>
@@ -58,6 +62,9 @@ namespace TD
         /// <returns>A transducer that passes all input through.</returns>
         public static ITransducer<TInput, TInput> Passing<TInput>() => new Passing<TInput>();
 
+        public static IAsyncReducer<TInput, TResult> AsAsync<TInput, TResult>(this IReducer<TInput, TResult> reducer) =>
+            new AsyncConvertedReducer<TInput, TResult>(reducer);
+
         /// <summary>
         /// Composes two transducers together by attaching the output of the first to the input of the second.
         /// </summary>
@@ -70,7 +77,7 @@ namespace TD
         public static ITransducer<A, C> Compose<A, B, C>(
             this ITransducer<A, B> first,
             ITransducer<B, C> second) =>
-                new ComposingTransducer<A, B, C>(first, second);
+                new Composing<A, B, C>(first, second);
 
         /// <summary>
         /// Composes two transducers together by attaching the output of the first to the input of the second.
