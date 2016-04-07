@@ -108,6 +108,18 @@ namespace TD
             Mapping<TInput, string>(val => string.Format(formatString, val));
 
         /// <summary>
+        /// Produces a transducer that formats the results of the input transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the original transducer.</typeparam>
+        /// <typeparam name="TResult">The type to be formatted</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <param name="formatString">The format string</param>
+        /// <returns>The new transducer</returns>
+        public static ITransducer<TInput, string> Formatting<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer,
+            string formatString) => transducer.Compose(Formatting<TResult>(formatString));
+
+        /// <summary>
         /// A transducer that terminates the input immediately after the first matching input is passed through.
         /// </summary>
         /// <typeparam name="TInput">The type of the input.</typeparam>
@@ -246,6 +258,28 @@ namespace TD
             int windowSize) => transducer.Compose(Sliding<TResult>(windowSize));
 
         /// <summary>
+        /// Takes multiple values at a time. Produces whole frames of values at a time and does not display
+        /// values present in prior frames - each frame is wholly unique.
+        /// </summary>
+        /// <typeparam name="T">The input type</typeparam>
+        /// <param name="frameSize">The size of each frame</param>
+        /// <returns>A transducer that frames its input</returns>
+        public static ITransducer<T, IList<T>> Framing<T>(int frameSize) => new Framing<T>(frameSize);
+
+        /// <summary>
+        /// Produces a transducer that frames the values produced from the original transducer.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the original transducer</typeparam>
+        /// <typeparam name="TResult">The framed result type</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <param name="frameSize">The size of each frame</param>
+        /// <returns>A new transducer</returns>
+        public static ITransducer<TInput, IList<TResult>> Framing<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer,
+            int frameSize) =>
+                transducer.Compose(Framing<TResult>(frameSize));
+
+        /// <summary>
         /// Creates a transducer that passes all input through all of the supplied transducers.
         /// </summary>
         /// <typeparam name="TInput">The input to each transducer</typeparam>
@@ -291,5 +325,42 @@ namespace TD
         public static ITransducer<TInput, TResult> Multiplexing<TInput, TMultiInput, TResult>(
             this ITransducer<TInput, TMultiInput> transducer,
             params ITransducer<TMultiInput, TResult>[] transducers) => transducer.Compose(Multiplexing(transducers));
+
+        /// <summary>
+        /// Converts numeric types to a byte array.
+        /// </summary>
+        /// <typeparam name="T">The numeric type</typeparam>
+        /// <returns>A transducer that produces byte arrays</returns>
+        public static ITransducer<T, byte[]> ConvertToBytes<T>() where T : struct => new ConvertToBytes<T>();
+
+        /// <summary>
+        /// Produces a transducer that converts the results of the original transducer to byte arrays.
+        /// </summary>
+        /// <typeparam name="TInput">The input to the original transducer</typeparam>
+        /// <typeparam name="TNumeric">The numeric type being converted</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <returns>The new transducer</returns>
+        public static ITransducer<TInput, byte[]> ConvertToBytes<TInput, TNumeric>(
+            this ITransducer<TInput, TNumeric> transducer) where TNumeric : struct =>
+                transducer.Compose(ConvertToBytes<TNumeric>());
+
+        /// <summary>
+        /// Converts byte sequences to numerics
+        /// </summary>
+        /// <typeparam name="TNumeric">The numeric type</typeparam>
+        /// <returns>A transducer that converts byte sequences to numerics</returns>
+        public static ITransducer<IEnumerable<byte>, TNumeric> ConvertToNumeric<TNumeric>() where TNumeric : struct => 
+            new ConvertToNumeric<TNumeric>();
+
+        /// <summary>
+        /// Produces a transducer that converts output from the original transducer to a numeric type.
+        /// </summary>
+        /// <typeparam name="TInput">The input type</typeparam>
+        /// <typeparam name="TNumeric">The numeric type</typeparam>
+        /// <param name="transducer">The original transducer</param>
+        /// <returns>The new transducer</returns>
+        public static ITransducer<TInput, TNumeric> ConvertToNumeric<TInput, TNumeric>(
+            this ITransducer<TInput, IEnumerable<byte>> transducer) where TNumeric : struct =>
+                transducer.Compose(ConvertToNumeric<TNumeric>());
     }
 }

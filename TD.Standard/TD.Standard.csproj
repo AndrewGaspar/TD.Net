@@ -43,10 +43,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Accumulator.cs" />
+    <Compile Include="BitConvert.cs" />
     <Compile Include="Catching.cs" />
     <Compile Include="Enumerating.cs" />
     <Compile Include="Feedback.cs" />
     <Compile Include="Multiplexing.cs" />
+    <Compile Include="ForOne.cs" />
+    <Compile Include="Slice.cs" />
     <Compile Include="Sliding.cs" />
     <Compile Include="Terminating.cs" />
     <Compile Include="Switching.cs" />
@@ -54,6 +57,7 @@
     <Compile Include="Standard.cs" />
     <Compile Include="TextIO.cs" />
     <Compile Include="TryParsing.cs" />
+    <Compile Include="Framing.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
