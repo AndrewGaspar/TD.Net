@@ -1,5 +1,10 @@
 ﻿namespace TD
 {
+    public interface IAsyncTransducer<TInput, TResult>
+    {
+        IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next);
+    }
+
     /// <summary>
     /// Describes a computation as taking inputs of type TInput and producing results of type TResult.
     /// 
@@ -8,7 +13,7 @@
     /// </summary>
     /// <typeparam name="TInput">The type of the inputs to this computation.</typeparam>
     /// <typeparam name="TResult">The type of the results produced by this computation.</typeparam>
-    public interface ITransducer<TInput, TResult>
+    public interface ISyncTransducer<TInput, TResult>
     {
         /// <summary>
         /// Produces a reducer by application of another reducer. The produced reducer will take
@@ -23,8 +28,7 @@
         IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next);
     }
 
-    public interface IAsyncTransducer<TInput, TResult>
-    {
-        IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next);
-    }
+    public interface ITransducer<TInput, TResult> : 
+        IAsyncTransducer<TInput, TResult>, ISyncTransducer<TInput, TResult>
+    { }
 }

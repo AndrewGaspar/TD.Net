@@ -3,64 +3,77 @@ using System.Threading.Tasks;
 
 namespace TD
 {
-    internal class Mapping<From, To> : ITransducer<From, To>
+    internal class Mapping<TInput, TResult> : ITransducer<TInput, TResult>
     {
-        private class Reducer<Reduction> : DefaultCompletionReducer<Reduction, From, To>
+        private class Reducer<Reduction> : DefaultCompletionReducer<Reduction, TInput, TResult>
         {
-            private readonly Func<From, To> MappingFunction;
+            private readonly Func<TInput, TResult> MappingFunction;
 
             public Reducer(
-                Func<From, To> mappingFunction,
-                IReducer<Reduction, To> reducer) : base(reducer)
+                Func<TInput, TResult> mappingFunction,
+                IReducer<Reduction, TResult> reducer) : base(reducer)
             {
                 MappingFunction = mappingFunction;
             }
 
-            public override Terminator<Reduction> Invoke(Reduction reduction, From value) =>
+            public override Terminator<Reduction> Invoke(Reduction reduction, TInput value) =>
                 Next.Invoke(reduction, MappingFunction(value));
         }
 
-        public Func<From, To> MappingFunction { get; private set; }
+        private class AsyncReducer<TReduction> : DefaultCompletionAsyncReducer<TReduction, TInput, TResult>
+        {
+            private readonly Func<TInput, TResult> MappingFunction;
 
-        public Mapping(Func<From, To> func)
+            public AsyncReducer(
+                Func<TInput, TResult> mappingFunction,
+                IAsyncReducer<TReduction, TResult> reducer) : base(reducer)
+            {
+                MappingFunction = mappingFunction;
+            }
+
+            public override Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value) =>
+                Next.InvokeAsync(reduction, MappingFunction(value));
+        }
+
+        public Func<TInput, TResult> MappingFunction { get; private set; }
+
+        public Mapping(Func<TInput, TResult> func)
         {
             MappingFunction = func;
         }
 
-        public IReducer<Reduction, From> Apply<Reduction>(IReducer<Reduction, To> reducer) =>
-            new Reducer<Reduction>(MappingFunction, reducer);
+        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> reducer) =>
+            new Reducer<TReduction>(MappingFunction, reducer);
+
+        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next) =>
+            new AsyncReducer<TReduction>(MappingFunction, next);
     }
 
-    internal class AsyncMapping<From, To> : IAsyncTransducer<From, To>
+    internal class AsyncMapping<TInput, TResult> : IAsyncTransducer<TInput, TResult>
     {
-        private class Reducer<TReduction> : IAsyncReducer<TReduction, From>
+        private class Reducer<TReduction> : DefaultCompletionAsyncReducer<TReduction, TInput, TResult>
         {
-            private readonly Func<From, Task<To>> MappingFunction;
-            private readonly IAsyncReducer<TReduction, To> Next;
+            private readonly Func<TInput, Task<TResult>> MappingFunction;
 
             public Reducer(
-                Func<From, Task<To>> mappingFunction,
-                IAsyncReducer<TReduction, To> reducer)
+                Func<TInput, Task<TResult>> mappingFunction,
+                IAsyncReducer<TReduction, TResult> next) : base(next)
             {
                 MappingFunction = mappingFunction;
-                Next = reducer;
             }
-
-            public Task<Terminator<TReduction>> CompleteAsync(TReduction reduction) =>
-                Next.CompleteAsync(reduction);
-
-            public async Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, From value) =>
+            
+            public override async Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value) =>
                 await Next.InvokeAsync(reduction, await MappingFunction(value).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        public Func<From, Task<To>> MappingFunction { get; private set; }
+        public Func<TInput, Task<TResult>> MappingFunction { get; private set; }
 
-        public AsyncMapping(Func<From, Task<To>> func)
+        public AsyncMapping(Func<TInput, Task<TResult>> func)
         {
             MappingFunction = func;
         }
 
-        public IAsyncReducer<Reduction, From> Apply<Reduction>(IAsyncReducer<Reduction, To> reducer) =>
-            new Reducer<Reduction>(MappingFunction, reducer);
+        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> reducer) =>
+            new Reducer<TReduction>(MappingFunction, reducer);
     }
 }

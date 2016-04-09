@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TD
 {
@@ -26,8 +27,8 @@ namespace TD
                 Catching<TInput, TResult, TException> transducer,
                 IReducer<TReduction, TResult> next) : base(next)
             {
-                success = transducer.success.Apply(next);
-                exceptional = transducer.exceptional.Apply(next);
+                success = transducer.Success.Apply(next);
+                exceptional = transducer.Exceptional.Apply(next);
             }
 
             public override Terminator<TReduction> Invoke(TReduction reduction, TInput value)
@@ -45,18 +46,49 @@ namespace TD
             }
         }
 
-        private readonly ITransducer<TInput, TResult> success;
-        private readonly ITransducer<ExceptionalInput<TInput, TException>, TResult> exceptional;
+        class AsyncReducer<TReduction> : DefaultCompletionAsyncReducer<TReduction, TInput, TResult>
+        {
+            private readonly IAsyncReducer<TReduction, TInput> success;
+            private readonly IAsyncReducer<TReduction, ExceptionalInput<TInput, TException>> exceptional;
+
+            public AsyncReducer(
+                Catching<TInput, TResult, TException> transducer,
+                IAsyncReducer<TReduction, TResult> next) : base(next)
+            {
+                success = transducer.Success.Apply(next);
+                exceptional = transducer.Exceptional.Apply(next);
+            }
+
+            public override async Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value)
+            {
+                try
+                {
+                    return await success.InvokeAsync(reduction, value);
+                }
+                catch (TException exception)
+                {
+                    return await exceptional.InvokeAsync(
+                        reduction,
+                        new ExceptionalInput<TInput, TException>(value, exception));
+                }
+            }
+        }
+
+        private readonly ITransducer<TInput, TResult> Success;
+        private readonly ITransducer<ExceptionalInput<TInput, TException>, TResult> Exceptional;
 
         public Catching(
             ITransducer<TInput, TResult> successTransducer,
             ITransducer<ExceptionalInput<TInput, TException>, TResult> exceptionalTransducer)
         {
-            success = successTransducer;
-            exceptional = exceptionalTransducer;
+            Success = successTransducer;
+            Exceptional = exceptionalTransducer;
         }
 
-        public IReducer<Reduction, TInput> Apply<Reduction>(IReducer<Reduction, TResult> reducer) =>
-            new Reducer<Reduction>(this, reducer);
+        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next) =>
+            new Reducer<TReduction>(this, next);
+
+        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next) =>
+            new AsyncReducer<TReduction>(this, next);
     }
 }

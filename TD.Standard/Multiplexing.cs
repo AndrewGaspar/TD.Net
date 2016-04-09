@@ -37,6 +37,35 @@ namespace TD
                 EachReducer(start, (reduction, reducer) => reducer.Invoke(reduction, value));
         }
 
+        private class AsyncDemux<TReduction> : IAsyncReducer<TReduction, TInput>
+        {
+            private readonly IList<IAsyncReducer<TReduction, TInput>> Reducers;
+
+            public AsyncDemux(IList<IAsyncReducer<TReduction, TInput>> reducers)
+            {
+                Reducers = reducers;
+            }
+
+            private async Task<Terminator<TReduction>> EachReducer(
+                TReduction reduction,
+                Func<TReduction, IAsyncReducer<TReduction, TInput>, Task<Terminator<TReduction>>> func)
+            {
+                return (await Reducers.ReduceAsync(Reduction(reduction),
+                    Reducer.AsyncMake<Terminator<TReduction>, IAsyncReducer<TReduction, TInput>>(
+                        async (terminator, reducer) =>
+                        {
+                            terminator = await func(terminator.Value, reducer);
+                            return Reduction(terminator, terminated: terminator.IsTerminated);
+                        }))).Value;
+            }
+
+            public Task<Terminator<TReduction>> CompleteAsync(TReduction start) =>
+                EachReducer(start, (reduction, reducer) => reducer.CompleteAsync(reduction));
+
+            public Task<Terminator<TReduction>> InvokeAsync(TReduction start, TInput value) =>
+                EachReducer(start, (reduction, reducer) => reducer.InvokeAsync(reduction, value));
+        }
+
         private readonly IList<ITransducer<TInput, TResult>> Transducers;
 
         public Multiplexing(IList<ITransducer<TInput, TResult>> transducers)
@@ -44,9 +73,12 @@ namespace TD
             Transducers = transducers;
         }
 
-        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next)
+        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next) =>
+            new Demux<TReduction>(Transducers.Select(transducer => transducer.Apply(next)).ToList());
+
+        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next)
         {
-            return new Demux<TReduction>(Transducers.Select(transducer => transducer.Apply(next)).ToList());
+            throw new NotImplementedException();
         }
     }
 }

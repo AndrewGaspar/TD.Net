@@ -16,8 +16,8 @@ namespace TD
         /// </summary>
         /// <typeparam name="TResult">The type of the parsed values.</typeparam>
         /// <returns>A transducer that produces values for parse-able values and null for non-parse-able values.</returns>
-        public static ITransducer<string, TResult?> TryParsing<TResult>() where TResult : struct => 
-            new TryParsingTransducer<TResult>();
+        public static ITransducer<string, TResult?> TryParsing<TResult>() where TResult : struct =>
+            Mapping<string, TResult?>(TD.Parsing.GetParser<TResult>().TryParse);
 
         /// <summary>
         /// Produces a transducer that produces values parsed from the results of the supplied transducer.
@@ -35,8 +35,8 @@ namespace TD
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <returns>A transducer that produces results parsed from the input.</returns>
-        public static ITransducer<string, TResult> Parsing<TResult>() where TResult : struct => 
-            new ParsingTransducer<TResult>();
+        public static ITransducer<string, TResult> Parsing<TResult>() where TResult : struct =>
+            Mapping<string, TResult>(TD.Parsing.GetParser<TResult>().Parse);
 
         /// <summary>
         /// Produces a transducer that parses the results of the supplied transducer.

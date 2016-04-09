@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using static TD.Terminator;
 
 namespace TD
 {
@@ -63,28 +65,42 @@ namespace TD
         public ITransducer<TInput, TResult> Transducer { get; private set; }
     }
 
-    internal class Switching<From, To> : ITransducer<From, To>
+    internal class Switching<TInput, TResult> : ITransducer<TInput, TResult>
     {
-        class SplittingReducer<Reduction> : IReducer<Reduction, From>
+        private class SplittingReducer<TReduction> : IReducer<TReduction, TInput>
         {
-            class JoiningReducer : IReducer<Reduction, To>
+            private class ReducerOption
             {
-                private SplittingReducer<Reduction> splitter;
-                private IReducer<Reduction, To> next;
-
-                public JoiningReducer(
-                    SplittingReducer<Reduction> splitter,
-                    IReducer<Reduction, To> next)
+                public ReducerOption(Predicate<TInput> test, IReducer<TReduction, TInput> reducer)
                 {
-                    this.splitter = splitter;
-                    this.next = next;
+                    Test = test;
+                    IsTerminated = false;
+                    Reducer = reducer;
                 }
 
-                private bool CheckTermination(Terminator<Reduction> terminator)
+                public Predicate<TInput> Test { get; private set; }
+                public bool IsTerminated { get; set; }
+                public IReducer<TReduction, TInput> Reducer { get; set; }
+            }
+
+            private class JoiningReducer : IReducer<TReduction, TResult>
+            {
+                private readonly SplittingReducer<TReduction> Splitter;
+                private readonly IReducer<TReduction, TResult> Next;
+
+                public JoiningReducer(
+                    SplittingReducer<TReduction> splitter,
+                    IReducer<TReduction, TResult> next)
+                {
+                    Splitter = splitter;
+                    Next = next;
+                }
+
+                private bool CheckTermination(Terminator<TReduction> terminator)
                 {
                     if (terminator.IsTerminated)
                     {
-                        foreach (var reducer in splitter.reducers)
+                        foreach (var reducer in Splitter.Reducers)
                         {
                             reducer.IsTerminated = true;
                         }
@@ -95,59 +111,45 @@ namespace TD
                     return false;
                 }
 
-                public Terminator<Reduction> Complete(Reduction reduction)
+                public Terminator<TReduction> Complete(TReduction reduction)
                 {
-                    var terminator = next.Complete(reduction);
+                    var terminator = Next.Complete(reduction);
 
                     var terminated = CheckTermination(terminator);
 
-                    return Terminator.Reduction(terminator.Value, terminated: terminated);
+                    return Reduction(terminator.Value, terminated: terminated);
                 }
 
-                public Terminator<Reduction> Invoke(Reduction reduction, To value)
+                public Terminator<TReduction> Invoke(TReduction reduction, TResult value)
                 {
-                    var terminator = next.Invoke(reduction, value);
+                    var terminator = Next.Invoke(reduction, value);
 
                     var terminated = CheckTermination(terminator);
 
-                    return Terminator.Reduction(terminator.Value, terminated: terminated);
+                    return Reduction(terminator.Value, terminated: terminated);
                 }
             }
-            
-            class ReducerOption
-            {
-                public ReducerOption(Predicate<From> test, IReducer<Reduction, From> reducer)
-                {
-                    Test = test;
-                    IsTerminated = false;
-                    Reducer = reducer;
-                }
 
-                public Predicate<From> Test { get; private set; }
-                public bool IsTerminated { get; set; }
-                public IReducer<Reduction, From> Reducer { get; set; }
-            }
-
-            private IList<ReducerOption> reducers;
-            private IReducer<Reduction, To> next;
+            private readonly IList<ReducerOption> Reducers;
+            private readonly IReducer<TReduction, TResult> Next;
 
             public SplittingReducer(
-                IList<TransducerSwitch<From, To>> transducers,
-                IReducer<Reduction, To> next)
+                IList<TransducerSwitch<TInput, TResult>> transducers,
+                IReducer<TReduction, TResult> next)
             {
-                this.reducers = transducers
+                Reducers = transducers
                     .Select(tSwitch =>
                         new ReducerOption(
                             tSwitch.Test, 
                             tSwitch.Transducer.Apply(new JoiningReducer(this, next))))
                     .ToList();
-                this.next = next;
+                Next = next;
             }
 
-            private ReducerOption GetMatchingReducer(From value) =>
-                reducers.First(reducer => reducer.Test(value));
+            private ReducerOption GetMatchingReducer(TInput value) =>
+                Reducers.First(reducer => reducer.Test(value));
 
-            public Terminator<Reduction> Invoke(Reduction reduction, From value)
+            public Terminator<TReduction> Invoke(TReduction reduction, TInput value)
             {
                 var reducer = GetMatchingReducer(value);
 
@@ -163,26 +165,141 @@ namespace TD
                     reduction = terminator.Value;
                 }
 
-                return Terminator.Reduction(reduction, terminated: reducers.All(red => red.IsTerminated));
+                return Reduction(reduction, terminated: Reducers.All(red => red.IsTerminated));
             }
 
-            public Terminator<Reduction> Complete(Reduction reduction) =>
-                reducers.Where(reducer => !reducer.IsTerminated)
-                        .Aggregate(Terminator.Reduction(reduction), (term, reducer) =>
+            public Terminator<TReduction> Complete(TReduction reduction) =>
+                Reducers.Where(reducer => !reducer.IsTerminated)
+                        .Aggregate(Reduction(reduction), (term, reducer) =>
                             reducer.Reducer.Complete(reduction));
         }
 
+        private class SplittingAsyncReducer<TReduction> : IAsyncReducer<TReduction, TInput>
+        {
+            private class AsyncReducerOption
+            {
+                public AsyncReducerOption(Predicate<TInput> test, IAsyncReducer<TReduction, TInput> reducer)
+                {
+                    Test = test;
+                    IsTerminated = false;
+                    Reducer = reducer;
+                }
 
-        public IList<TransducerSwitch<From, To>> Transducers { get; private set; }
+                public Predicate<TInput> Test { get; private set; }
+                public bool IsTerminated { get; set; }
+                public IAsyncReducer<TReduction, TInput> Reducer { get; set; }
+            }
 
-        public Switching(IList<TransducerSwitch<From, To>> transducers)
+            class JoiningReducer : IAsyncReducer<TReduction, TResult>
+            {
+                private readonly SplittingAsyncReducer<TReduction> Splitter;
+                private readonly IAsyncReducer<TReduction, TResult> Next;
+
+                public JoiningReducer(
+                    SplittingAsyncReducer<TReduction> splitter,
+                    IAsyncReducer<TReduction, TResult> next)
+                {
+                    Splitter = splitter;
+                    Next = next;
+                }
+
+                private bool CheckTermination(Terminator<TReduction> terminator)
+                {
+                    if (terminator.IsTerminated)
+                    {
+                        foreach (var reducer in Splitter.Reducers)
+                        {
+                            reducer.IsTerminated = true;
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                public async Task<Terminator<TReduction>> CompleteAsync(TReduction reduction)
+                {
+                    var terminator = await Next.CompleteAsync(reduction).ConfigureAwait(false);
+
+                    var terminated = CheckTermination(terminator);
+
+                    return Reduction(terminator.Value, terminated: terminated);
+                }
+
+                public async Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TResult value)
+                {
+                    var terminator = await Next.InvokeAsync(reduction, value).ConfigureAwait(false);
+
+                    var terminated = CheckTermination(terminator);
+
+                    return Reduction(terminator.Value, terminated: terminated);
+                }
+            }
+
+            private readonly IList<AsyncReducerOption> Reducers;
+            private readonly IAsyncReducer<TReduction, TResult> Next;
+
+            public SplittingAsyncReducer(
+                IList<TransducerSwitch<TInput, TResult>> transducers,
+                IAsyncReducer<TReduction, TResult> next)
+            {
+                Reducers = transducers
+                    .Select(tSwitch =>
+                        new AsyncReducerOption(
+                            tSwitch.Test,
+                            tSwitch.Transducer.Apply(new JoiningReducer(this, next))))
+                    .ToList();
+                Next = next;
+            }
+
+            private AsyncReducerOption GetMatchingReducer(TInput value) =>
+                Reducers.First(reducer => reducer.Test(value));
+
+            public async Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value)
+            {
+                var reducer = GetMatchingReducer(value);
+
+                if (!reducer.IsTerminated)
+                {
+                    var terminator = await reducer.Reducer.InvokeAsync(reduction, value);
+
+                    if (terminator.IsTerminated)
+                    {
+                        reducer.IsTerminated = true;
+                    }
+
+                    reduction = terminator.Value;
+                }
+
+                return Reduction(reduction, terminated: Reducers.All(red => red.IsTerminated));
+            }
+
+            public async Task<Terminator<TReduction>> CompleteAsync(TReduction reduction)
+            {
+                var filteringUnterminated = Core.Filtering<AsyncReducerOption>(option => !option.IsTerminated);
+
+                var invokesCompletion = Reducer.AsyncMake<Terminator<TReduction>, AsyncReducerOption>((terminator, option) =>
+                    option.Reducer.CompleteAsync(terminator.Value));
+
+                var reduceTask = Reducers.ReduceAsync(
+                    Reduction(reduction), filteringUnterminated.Apply(invokesCompletion));
+
+                return (await reduceTask.ConfigureAwait(false)).Value;
+            }
+        }
+
+
+        private readonly IList<TransducerSwitch<TInput, TResult>> Transducers;
+        public Switching(IList<TransducerSwitch<TInput, TResult>> transducers)
         {
             Transducers = transducers;
         }
 
-        public IReducer<Reduction, From> Apply<Reduction>(IReducer<Reduction, To> next)
-        {
-            return new SplittingReducer<Reduction>(Transducers, next);
-        }
+        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next) =>
+            new SplittingReducer<TReduction>(Transducers, next);
+
+        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next) =>
+            new SplittingAsyncReducer<TReduction>(Transducers, next);
     }
 }

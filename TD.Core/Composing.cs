@@ -1,4 +1,6 @@
-﻿namespace TD
+﻿using System;
+
+namespace TD
 {
     internal class Composing<TInput, TMedium, TResult> : ITransducer<TInput, TResult>
     {
@@ -13,24 +15,10 @@
             Right = right;
         }
 
-        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> reducer) =>
-            Left.Apply(Right.Apply(reducer));
-    }
+        public IReducer<TReduction, TInput> Apply<TReduction>(IReducer<TReduction, TResult> next) =>
+            Left.Apply(Right.Apply(next));
 
-    internal class AsyncComposing<TInput, TMedium, TResult> : IAsyncTransducer<TInput, TResult>
-    {
-        public IAsyncTransducer<TInput, TMedium> Left { get; private set; }
-        public IAsyncTransducer<TMedium, TResult> Right { get; private set; }
-
-        public AsyncComposing(
-            IAsyncTransducer<TInput, TMedium> left,
-            IAsyncTransducer<TMedium, TResult> right)
-        {
-            Left = left;
-            Right = right;
-        }
-
-        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next)
-            => Left.Apply(Right.Apply(next));
+        public IAsyncReducer<TReduction, TInput> Apply<TReduction>(IAsyncReducer<TReduction, TResult> next) =>
+            Left.Apply(Right.Apply(next));
     }
 }

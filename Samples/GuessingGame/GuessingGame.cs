@@ -106,6 +106,11 @@ namespace GuessingGame
         {
             return new Reducer<Reduction>(this, next);
         }
+
+        public IAsyncReducer<TReduction, int> Apply<TReduction>(IAsyncReducer<TReduction, GuessingGameResult> next)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class GuessingGame

@@ -97,6 +97,20 @@ namespace TD
         public abstract Terminator<TReduction> Complete(TReduction reduction);
     }
 
+    public abstract class BaseAsyncReducer<TReduction, TInput, TForward> : IAsyncReducer<TReduction, TInput>
+    {
+        protected readonly IAsyncReducer<TReduction, TForward> Next;
+
+        protected BaseAsyncReducer(IAsyncReducer<TReduction, TForward> next)
+        {
+            Next = next;
+        }
+
+        public abstract Task<Terminator<TReduction>> CompleteAsync(TReduction reduction);
+
+        public abstract Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, TInput value);
+    }
+
     /// <summary>
     /// A helper class for creating Reducers that have no special Completion behavior.
     /// 
@@ -118,7 +132,7 @@ namespace TD
         protected DefaultCompletionReducer(IReducer<TReduction, TForward> next) : base(next)
         {
         }
-        
+
         /// <summary>
         /// Called when input is exhausted.
         /// </summary>
@@ -127,5 +141,17 @@ namespace TD
         /// A wrapped reduction.
         /// </returns>
         public override Terminator<TReduction> Complete(TReduction reduction) => Next.Complete(reduction);
+    }
+
+    public abstract class DefaultCompletionAsyncReducer<TReduction, TInput, TForward> :
+        BaseAsyncReducer<TReduction, TInput, TForward>
+    {
+        protected DefaultCompletionAsyncReducer(IAsyncReducer<TReduction, TForward> next) : base(next)
+        {
+
+        }
+
+        public override Task<Terminator<TReduction>> CompleteAsync(TReduction reduction) =>
+            Next.CompleteAsync(reduction);
     }
 }
