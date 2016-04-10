@@ -29,6 +29,7 @@
     }
 
     public interface ITransducer<TInput, TResult> : 
-        IAsyncTransducer<TInput, TResult>, ISyncTransducer<TInput, TResult>
+        IAsyncTransducer<TInput, TResult>, 
+        ISyncTransducer<TInput, TResult>
     { }
 }

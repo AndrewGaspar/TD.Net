@@ -1,77 +1,134 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static TD.Terminator;
 
 namespace TD
 {
-    internal abstract class BaseAccumulationReducer<T> : IReducer<T, T>
+    internal abstract class BaseAccumulationTransducer<T> : ITransducer<T, T>
     {
-        public Terminator<T> Complete(T reduction) => Reduction(reduction);
-        public Terminator<T> Invoke(T reduction, T value) => Reduction(Add(reduction, value));
-        public abstract T Add(T reduction, T value);
+        private class Reducer<TReduction> : BaseReducer<TReduction, T, T>
+        {
+            private T Accumulation = default(T);
+            private readonly BaseAccumulationTransducer<T> Transducer;
 
-        public IReducer<U, U> As<U>() => this as IReducer<U, U>;
+            public Reducer(
+                BaseAccumulationTransducer<T> transducer,
+                IReducer<TReduction, T> next) : base(next)
+            {
+                Transducer = transducer;
+            }
+
+            public override Terminator<TReduction> Complete(TReduction reduction)
+            {
+                var terminator = Next.Invoke(reduction, Accumulation);
+
+                return terminator.IsTerminated
+                    ? terminator
+                    : Next.Complete(terminator.Value);
+            }
+
+            public override Terminator<TReduction> Invoke(TReduction reduction, T value)
+            {
+                Accumulation = Transducer.Add(Accumulation, value);
+                return Reduction(reduction);
+            }
+        }
+
+        private class AsyncReducer<TReduction> : BaseAsyncReducer<TReduction, T, T>
+        {
+            private T Accumulation;
+            private readonly BaseAccumulationTransducer<T> Transducer;
+
+            public AsyncReducer(
+                BaseAccumulationTransducer<T> transducer,
+                IAsyncReducer<TReduction, T> next) : base(next)
+            {
+                Transducer = transducer;
+            }
+
+            public override async Task<Terminator<TReduction>> CompleteAsync(TReduction reduction)
+            {
+                var terminator = await Next.InvokeAsync(reduction, Accumulation).ConfigureAwait(false);
+                
+                return terminator.IsTerminated 
+                    ? terminator 
+                    : await Next.CompleteAsync(terminator.Value).ConfigureAwait(false);
+            }
+
+            public override Task<Terminator<TReduction>> InvokeAsync(TReduction reduction, T value)
+            {
+                Accumulation = Transducer.Add(Accumulation, value);
+                return Task.FromResult(Reduction(reduction));
+            }
+        }
+        
+        public abstract T Add(T reduction, T value);
+        
+        public ITransducer<U, U> As<U>() => this as ITransducer<U, U>;
+
+        public IAsyncReducer<TReduction, T> Apply<TReduction>(IAsyncReducer<TReduction, T> next) =>
+            new AsyncReducer<TReduction>(this, next);
+
+        public IReducer<TReduction, T> Apply<TReduction>(IReducer<TReduction, T> next) =>
+            new Reducer<TReduction>(this, next);
     }
 
-    internal class UncheckedSByteAccumulator : BaseAccumulationReducer<sbyte>
+    internal class UncheckedSByteAccumulator : BaseAccumulationTransducer<sbyte>
     {
         public override sbyte Add(sbyte reduction, sbyte value) => (sbyte)(reduction + value);
     }
 
-    internal class UncheckedByteAccumulator : BaseAccumulationReducer<byte>
+    internal class UncheckedByteAccumulator : BaseAccumulationTransducer<byte>
     {
         public override byte Add(byte reduction, byte value) => (byte)(reduction + value);
     }
 
-    internal class UncheckedInt16Accumulator : BaseAccumulationReducer<short>
+    internal class UncheckedInt16Accumulator : BaseAccumulationTransducer<short>
     {
         public override short Add(short reduction, short value) => (short)(reduction + value);
     }
 
-    internal class UncheckedUint16Accumulator : BaseAccumulationReducer<ushort>
+    internal class UncheckedUint16Accumulator : BaseAccumulationTransducer<ushort>
     {
         public override ushort Add(ushort reduction, ushort value) => (ushort)(reduction + value);
     }
 
-    internal class UncheckedInt32Accumulator : BaseAccumulationReducer<int>
+    internal class UncheckedInt32Accumulator : BaseAccumulationTransducer<int>
     {
         public override int Add(int reduction, int value) => reduction + value;
     }
 
-    internal class UncheckedUint32Accumulator : BaseAccumulationReducer<uint>
+    internal class UncheckedUint32Accumulator : BaseAccumulationTransducer<uint>
     {
         public override uint Add(uint reduction, uint value) => reduction + value;
     }
 
-    internal class UncheckedInt64Accumulator : BaseAccumulationReducer<long>
+    internal class UncheckedInt64Accumulator : BaseAccumulationTransducer<long>
     {
         public override long Add(long reduction, long value) => reduction + value;
     }
 
-    internal class UncheckedUint64Accumulator : BaseAccumulationReducer<ulong>
+    internal class UncheckedUint64Accumulator : BaseAccumulationTransducer<ulong>
     {
         public override ulong Add(ulong reduction, ulong value) => reduction + value;
     }
 
-    internal class UncheckedFloatAccumulator : BaseAccumulationReducer<float>
+    internal class UncheckedFloatAccumulator : BaseAccumulationTransducer<float>
     {
         public override float Add(float reduction, float value) => reduction + value;
     }
 
-    internal class UncheckedDoubleAccumulator : BaseAccumulationReducer<double>
+    internal class UncheckedDoubleAccumulator : BaseAccumulationTransducer<double>
     {
         public override double Add(double reduction, double value) => reduction + value;
     }
 
-    internal class UncheckedDecimalAccumulator : BaseAccumulationReducer<decimal>
+    internal class UncheckedDecimalAccumulator : BaseAccumulationTransducer<decimal>
     {
         public override decimal Add(decimal reduction, decimal value) => reduction + value;
     }
 
-    internal class CheckedSByteAccumulator : BaseAccumulationReducer<sbyte>
+    internal class CheckedSByteAccumulator : BaseAccumulationTransducer<sbyte>
     {
         public override sbyte Add(sbyte reduction, sbyte value)
         {
@@ -82,7 +139,7 @@ namespace TD
         }
     }
 
-    internal class CheckedByteAccumulator : BaseAccumulationReducer<byte>
+    internal class CheckedByteAccumulator : BaseAccumulationTransducer<byte>
     {
         public override byte Add(byte reduction, byte value)
         {
@@ -93,7 +150,7 @@ namespace TD
         }
     }
 
-    internal class CheckedInt16Accumulator : BaseAccumulationReducer<short>
+    internal class CheckedInt16Accumulator : BaseAccumulationTransducer<short>
     {
         public override short Add(short reduction, short value)
         {
@@ -104,7 +161,7 @@ namespace TD
         }
     }
 
-    internal class CheckedUint16Accumulator : BaseAccumulationReducer<ushort>
+    internal class CheckedUint16Accumulator : BaseAccumulationTransducer<ushort>
     {
         public override ushort Add(ushort reduction, ushort value)
         {
@@ -115,44 +172,44 @@ namespace TD
         }
     }
 
-    internal class CheckedInt32Accumulator : BaseAccumulationReducer<int>
+    internal class CheckedInt32Accumulator : BaseAccumulationTransducer<int>
     {
         public override int Add(int reduction, int value) => checked(reduction + value);
     }
 
-    internal class CheckedUint32Accumulator : BaseAccumulationReducer<uint>
+    internal class CheckedUint32Accumulator : BaseAccumulationTransducer<uint>
     {
         public override uint Add(uint reduction, uint value) => checked(reduction + value);
     }
 
-    internal class CheckedInt64Accumulator : BaseAccumulationReducer<long>
+    internal class CheckedInt64Accumulator : BaseAccumulationTransducer<long>
     {
         public override long Add(long reduction, long value) => checked(reduction + value);
     }
 
-    internal class CheckedUint64Accumulator : BaseAccumulationReducer<ulong>
+    internal class CheckedUint64Accumulator : BaseAccumulationTransducer<ulong>
     {
         public override ulong Add(ulong reduction, ulong value) => checked(reduction + value);
     }
 
-    internal class CheckedFloatAccumulator : BaseAccumulationReducer<float>
+    internal class CheckedFloatAccumulator : BaseAccumulationTransducer<float>
     {
         public override float Add(float reduction, float value) => checked(reduction + value);
     }
 
-    internal class CheckedDoubleAccumulator : BaseAccumulationReducer<double>
+    internal class CheckedDoubleAccumulator : BaseAccumulationTransducer<double>
     {
         public override double Add(double reduction, double value) => checked(reduction + value);
     }
 
-    internal class CheckedDecimalAccumulator : BaseAccumulationReducer<decimal>
+    internal class CheckedDecimalAccumulator : BaseAccumulationTransducer<decimal>
     {
         public override decimal Add(decimal reduction, decimal value) => checked(reduction + value);
     }
 
-    public static class Accumulator
+    public static class Accumulating
     {
-        public static IReducer<T, T> Unchecked<T>() where T : struct
+        public static ITransducer<T, T> Unchecked<T>() where T : struct
         {
             if (typeof(T) == typeof(sbyte)) return new UncheckedSByteAccumulator().As<T>();
             if (typeof(T) == typeof(byte)) return new UncheckedByteAccumulator().As<T>();
@@ -169,7 +226,7 @@ namespace TD
             throw new NotImplementedException($"{nameof(Accumulator.Unchecked)} not implemented for type {typeof(T)}.");
         }
 
-        public static IReducer<T, T> Checked<T>() where T : struct
+        public static ITransducer<T, T> Checked<T>() where T : struct
         {
             if (typeof(T) == typeof(sbyte)) return new CheckedSByteAccumulator().As<T>();
             if (typeof(T) == typeof(byte)) return new CheckedByteAccumulator().As<T>();
@@ -185,5 +242,14 @@ namespace TD
 
             throw new NotImplementedException($"{nameof(Accumulator.Checked)} not implemented for type {typeof(T)}.");
         }
+    }
+
+    public static class Accumulator
+    {
+        public static IReducer<T, T> Unchecked<T>() where T : struct =>
+            Accumulating.Unchecked<T>().Apply(Reducer.Make<T, T>((acc, val) => val));
+
+        public static IReducer<T, T> Checked<T>() where T : struct =>
+            Accumulating.Checked<T>().Apply(Reducer.Make<T, T>((acc, val) => val));
     }
 }

@@ -67,6 +67,23 @@ namespace TD
         public static IReducer<TextWriter, TInput> WriteReducer<TInput>() => 
             Erasing<TInput>().Apply(WriteReducer());
 
+        public static IReducer<TextWriter, TInput> WriteReducer<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer) => transducer.Apply(WriteReducer<TResult>());
+
+        /// <summary>
+        /// Returns a reducer that writes the input to a TextWriter.
+        /// </summary>
+        /// <returns>A reducer.</returns>
+        public static IAsyncReducer<TextWriter, string> AsyncWriteReducer() =>
+            Reducer.AsyncMake<TextWriter, string>(async (writer, input) =>
+            {
+                await writer.WriteAsync(input).ConfigureAwait(false);
+                return writer;
+            });
+
+        public static IAsyncReducer<TextWriter, TInput> AsyncWriteReducer<TInput>(
+            this IAsyncTransducer<TInput, string> transducer) => transducer.Apply(AsyncWriteReducer());
+
         /// <summary>
         /// Returns a reducer that writes the input to a TextWriter line-by-line.
         /// </summary>
@@ -85,5 +102,18 @@ namespace TD
         /// <returns>A reducer.</returns>
         public static IReducer<TextWriter, TInput> WriteLineReducer<TInput>() =>
             Erasing<TInput>().Apply(WriteLineReducer());
+
+        public static IReducer<TextWriter, TInput> WriteLineReducer<TInput, TResult>(
+            this ITransducer<TInput, TResult> transducer) => transducer.Apply(WriteLineReducer<TResult>());
+
+        public static IAsyncReducer<TextWriter, string> AsyncWriteLineReducer() =>
+            Reducer.AsyncMake<TextWriter, string>(async (writer, input) =>
+            {
+                await writer.WriteLineAsync(input).ConfigureAwait(false);
+                return writer;
+            });
+
+        public static IAsyncReducer<TextWriter, TInput> AsyncWriteLineReducer<TInput>(
+            this IAsyncTransducer<TInput, string> transducer) => transducer.Apply(AsyncWriteLineReducer());
     }
 }

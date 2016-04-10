@@ -40,6 +40,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Awaiting.cs" />
     <Compile Include="Passing.cs" />
     <Compile Include="ITransducer.cs" />
     <Compile Include="IReducer.cs" />

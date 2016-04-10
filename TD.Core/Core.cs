@@ -30,10 +30,15 @@ namespace TD
         /// <param name="map">The mapping function.</param>
         /// <returns>A transducer that maps values from the supplied transducer to values being produced from the new transducer.</returns>
         public static ITransducer<TInput, TResult> Mapping<TInput, TMedium, TResult>(
-            this ITransducer<TInput, TMedium> transducer, Func<TMedium, TResult> map) => Compose(transducer, Mapping(map));
+            this ITransducer<TInput, TMedium> transducer, Func<TMedium, TResult> map) => transducer.Compose(Mapping(map));
+        
+        public static IAsyncTransducer<TInput, TResult> Mapping<TInput, TMedium, TResult>(
+            this IAsyncTransducer<TInput, TMedium> transducer, Func<TMedium, TResult> map) => transducer.AsyncCompose(Mapping(map));
 
-        public static IAsyncTransducer<TInput, TResult> AsyncMapping<TInput, TResult>(Func<TInput, Task<TResult>> map) =>
-            new AsyncMapping<TInput, TResult>(map);
+        public static IAsyncTransducer<Task<TInput>, TInput> Awaiting<TInput>() => new Awaiting<TInput>();
+
+        public static IAsyncTransducer<TInput, TMedium> Awaiting<TInput, TMedium>(
+            this ITransducer<TInput, Task<TMedium>> transducer) => transducer.AsyncCompose(Awaiting<TMedium>());
 
         /// <summary>
         /// Filters input values based on the supplied filtering functions.
@@ -54,6 +59,9 @@ namespace TD
         /// <returns>A transducer whose results are filtered from the supplied transducer.</returns>
         public static ITransducer<TInput, TResult> Filtering<TInput, TResult>(
             this ITransducer<TInput, TResult> transducer, Predicate<TResult> test) => Compose(transducer, Filtering(test));
+
+        public static IAsyncTransducer<TInput, TResult> Filtering<TInput, TResult>(
+            this IAsyncTransducer<TInput, TResult> transducer, Predicate<TResult> test) => transducer.AsyncCompose(Filtering(test));
 
         /// <summary>
         /// The identity transducer. All input is passed to the output.
@@ -160,5 +168,115 @@ namespace TD
             ITransducer<D, E> fourth,
             ITransducer<E, F> fifth,
             ITransducer<F, G> sixth) => Compose(first, second, third, fourth, fifth).Compose(sixth);
+
+        /// <summary>
+        /// Composes two transducers together by attaching the output of the first to the input of the second.
+        /// </summary>
+        /// <typeparam name="A">The starting input.</typeparam>
+        /// <typeparam name="B">b</typeparam>
+        /// <typeparam name="C">The output type.</typeparam>
+        /// <param name="first">The first transducer.</param>
+        /// <param name="second">The second transducer.</param>
+        /// <returns>A transducer composed from the input transducers.</returns>
+        public static ISyncTransducer<A, C> SyncCompose<A, B, C>(
+            this ISyncTransducer<A, B> first,
+            ISyncTransducer<B, C> second) =>
+                new SyncComposing<A, B, C>(first, second);
+
+        /// <summary>
+        /// Composes two transducers together by attaching the output of the first to the input of the second.
+        /// </summary>
+        /// <typeparam name="A">The starting input.</typeparam>
+        /// <typeparam name="B">b</typeparam>
+        /// <typeparam name="C">The output type.</typeparam>
+        /// <param name="first">The first transducer.</param>
+        /// <param name="second">The second transducer.</param>
+        /// <returns>A transducer composed from the input transducers.</returns>
+        public static IAsyncTransducer<A, C> AsyncCompose<A, B, C>(
+            this IAsyncTransducer<A, B> first,
+            IAsyncTransducer<B, C> second) =>
+                new AsyncComposing<A, B, C>(first, second);
+
+        /// <summary>
+        /// Composes two transducers together by attaching the output of the first to the input of the second.
+        /// </summary>
+        /// <typeparam name="A">The starting input.</typeparam>
+        /// <typeparam name="B">b</typeparam>
+        /// <typeparam name="C">c</typeparam>
+        /// <typeparam name="D">The output type.</typeparam>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
+        /// <param name="third">The third.</param>
+        /// <returns>A transducer composed from the input transducers.</returns>
+        public static IAsyncTransducer<A, D> AsyncCompose<A, B, C, D>(
+            IAsyncTransducer<A, B> first,
+            IAsyncTransducer<B, C> second,
+            IAsyncTransducer<C, D> third) => AsyncCompose(first, second).AsyncCompose(third);
+
+        /// <summary>
+        /// Composes two transducers together by attaching the output of the first to the input of the second.
+        /// </summary>
+        /// <typeparam name="A">The input.</typeparam>
+        /// <typeparam name="B">b</typeparam>
+        /// <typeparam name="C">c</typeparam>
+        /// <typeparam name="D">d</typeparam>
+        /// <typeparam name="E">The result.</typeparam>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
+        /// <param name="third">The third.</param>
+        /// <param name="fourth">The fourth.</param>
+        /// <returns>A transducer composed from the input transducers.</returns>
+        public static IAsyncTransducer<A, E> AsyncCompose<A, B, C, D, E>(
+            IAsyncTransducer<A, B> first,
+            IAsyncTransducer<B, C> second,
+            IAsyncTransducer<C, D> third,
+            IAsyncTransducer<D, E> fourth) => AsyncCompose(first, second, third).AsyncCompose(fourth);
+
+        /// <summary>
+        /// Composes two transducers together by attaching the output of the first to the input of the second.
+        /// </summary>
+        /// <typeparam name="A">The input.</typeparam>
+        /// <typeparam name="B">b</typeparam>
+        /// <typeparam name="C">c</typeparam>
+        /// <typeparam name="D">d</typeparam>
+        /// <typeparam name="E">e</typeparam>
+        /// <typeparam name="F">The result.</typeparam>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
+        /// <param name="third">The third.</param>
+        /// <param name="fourth">The fourth.</param>
+        /// <param name="fifth">The fifth.</param>
+        /// <returns>A transducer composed from the input transducers.</returns>
+        public static IAsyncTransducer<A, F> AsyncCompose<A, B, C, D, E, F>(
+            IAsyncTransducer<A, B> first,
+            IAsyncTransducer<B, C> second,
+            IAsyncTransducer<C, D> third,
+            IAsyncTransducer<D, E> fourth,
+            IAsyncTransducer<E, F> fifth) => AsyncCompose(first, second, third, fourth).AsyncCompose(fifth);
+
+        /// <summary>
+        /// Composes two transducers together by attaching the output of the first to the input of the second.
+        /// </summary>
+        /// <typeparam name="A">The input.</typeparam>
+        /// <typeparam name="B">b</typeparam>
+        /// <typeparam name="C">c</typeparam>
+        /// <typeparam name="D">d</typeparam>
+        /// <typeparam name="E">e</typeparam>
+        /// <typeparam name="F">f</typeparam>
+        /// <typeparam name="G">The result.</typeparam>
+        /// <param name="first">The first.</param>
+        /// <param name="second">The second.</param>
+        /// <param name="third">The third.</param>
+        /// <param name="fourth">The fourth.</param>
+        /// <param name="fifth">The fifth.</param>
+        /// <param name="sixth">The sixth.</param>
+        /// <returns>A transducer composed from the input transducers.</returns>
+        public static IAsyncTransducer<A, G> AsyncCompose<A, B, C, D, E, F, G>(
+            IAsyncTransducer<A, B> first,
+            IAsyncTransducer<B, C> second,
+            IAsyncTransducer<C, D> third,
+            IAsyncTransducer<D, E> fourth,
+            IAsyncTransducer<E, F> fifth,
+            IAsyncTransducer<F, G> sixth) => AsyncCompose(first, second, third, fourth, fifth).AsyncCompose(sixth);
     }
 }

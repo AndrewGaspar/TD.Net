@@ -245,6 +245,21 @@ namespace TD
             this ITransducer<TInput, TResult> transducer,
             int windowSize) => transducer.Compose(Sliding<TResult>(windowSize));
 
+        public static ITransducer<IList<T>, T> CheckedSumming<T>() where T : struct =>
+            Mapping<IList<T>, T>(list => 
+                list.Reduce(default(T), Accumulator.Checked<T>()).Value);
+
+        public static ITransducer<TInput, TResult> CheckedSumming<TInput, TResult>(
+            this ITransducer<TInput, IList<TResult>> transducer) where TResult : struct =>
+                transducer.Compose(CheckedSumming<TResult>());
+
+        public static ITransducer<IList<T>, T> UncheckedSumming<T>() where T : struct =>
+            Mapping<IList<T>, T>(list => list.Reduce(default(T), Accumulator.Unchecked<T>()).Value);
+
+        public static ITransducer<TInput, TResult> UncheckedSumming<TInput, TResult>(
+            this ITransducer<TInput, IList<TResult>> transducer) where TResult : struct =>
+                transducer.Compose(UncheckedSumming<TResult>());
+
         /// <summary>
         /// Creates a transducer that passes all input through all of the supplied transducers.
         /// </summary>
