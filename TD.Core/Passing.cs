@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TD
+﻿namespace TD
 {
     internal class Passing<T> : ITransducer<T, T>
     {
